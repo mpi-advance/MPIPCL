@@ -1,0 +1,11 @@
+mpipcl
+mpipcltest1
+mpipcltest2
+mpipcltest3
+mpipcltest4
+mpipcltest5
+*.o
+*.a
+*.exe
+
+/build/
