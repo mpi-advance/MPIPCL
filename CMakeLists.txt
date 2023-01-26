@@ -14,8 +14,9 @@ endif()
 
 
 ##### available options #####
-option(BUILD_STATIC_LIBS "Build MPIPCL static library." ON)
-option(BUILD_SHARED_LIBS "Build MPIPCL shared library." OFF)
+option(BUILD_STATIC_LIBS "Build MPIPCL static library." OFF)
+option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
+option(WITH_DEBUG "Turn debug statements on or off." OFF)
 
 ##### available targets #####
 add_library(mpipcl "")
@@ -35,11 +36,11 @@ add_subdirectory(include)
 if(CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	# add additional debug flags for DEBUG
 	target_compile_options(mpipcl PRIVATE -Wall -Wextra -Wpedantic)
-
 	target_compile_options(mpipcl PRIVATE -Wno-unused-parameter)
-	target_compile_options(mpipcl PRIVATE -Wno-unused-function)
-	target_compile_options(mpipcl PRIVATE -Wno-unused-variable)
-	target_compile_options(mpipcl PRIVATE -Wno-unused-but-set-variable)
+endif()
+
+if(CMAKE_BUILD_TYPE MATCHES "DEBUG" OR WITH_DEBUG)
+	add_definitions(-DWITH_DEBUG)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES "RELEASE")
