@@ -150,7 +150,7 @@ int map_recv_buffer(int id, MPIX_Request *request)
 
 	// check status of dependent requests
 	int flag = 0;
-	int ret_val = MPI_Testall(end - start + 1, &request->request[id], &flag, MPI_STATUSES_IGNORE);
+	int ret_val = MPI_Testall(end - start + 1, &request->request[start], &flag, MPI_STATUSES_IGNORE);
 	assert(MPI_SUCCESS == ret_val);
 
 	// if true store for future shortcut
