@@ -64,32 +64,31 @@ int main(int argc, char *argv[]) {
     MPIX_Start(&req);
 
     #pragma omp parallel for shared(buf,req,sum) num_threads(nparts)
-    for (i = 0; i < nparts; i++) {
-       int j, flag = 0, testflag; 
-       double mysum = 0.0;
-       while (!flag) {
-          /* check if partition has been received */
-          MPIX_Parrived(&req, i, &flag); 
+      for (i = 0; i < nparts; i++) {
+        int j, flag = 0; 
+        double mysum = 0.0;
+        while (!flag) {
+            /* check if partition has been received */
+            MPIX_Parrived(&req, i, &flag); 
 
-          if (flag) {
-            /* compute the partial sum of the values received */
-            for (j = 0, mysum = 0.0; j < count; j++)
-               mysum += buf[j + i*count];
+            if (flag) {
+              /* compute the partial sum of the values received */
+              for (j = 0, mysum = 0.0; j < count; j++)
+                mysum += buf[j + i*count];
 
-            /* update global sum */
-            #pragma omp critical 
-            sum += mysum;
-          } else {
-            /* do some other work */
-            MPIX_Test(&req, &testflag, MPI_STATUS_IGNORE);
-            /* do some other work based on testflag */
-          }
-       }
-    }
+              /* update global sum */
+              #pragma omp critical 
+              sum += mysum;
+            }
+        }
+      }
+
+    MPIX_Wait(&req, MPI_STATUS_IGNORE);
     printf("#partitions = %d bufsize = %d count = %d sum = %f (%f)\n", 
            nparts, bufsize, count, sum, ((double)bufsize*(bufsize+1))/2.0);
   }
 
+  MPIX_Request_free(&req);
   free(buf);
   MPI_Finalize();
 

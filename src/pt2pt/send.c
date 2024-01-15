@@ -128,7 +128,7 @@ void map_send_buffer_count(int id, MPIX_Request *request)
 		// if ready is true after loop set status as ready.
 		if (request->internal_status[i] == threshold)
 		{
-			MPIPCL_DEBUG("Starting request %d \n", i);
+			MPIPCL_DEBUG("Starting request %d %p \n", i, (void *) (&request->request[i]));
 			int ret_val = MPI_Start(&request->request[i]);
 			assert(MPI_SUCCESS == ret_val);
 		}

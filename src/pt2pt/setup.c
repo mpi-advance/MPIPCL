@@ -137,13 +137,17 @@ void internal_setup(MPIX_Request *request)
     {
       ret_val = MPI_Send_init((char *)mes->buff + offset, request->size, mes->type, mes->partner, mes->tag + i, mes->comm, &request->request[i]);
       assert(MPI_SUCCESS == ret_val);
-      MPIPCL_DEBUG("Send_init called");
+      MPIPCL_DEBUG("Send_init called - buffer: %p - req pointer: %p\n",
+                  (void *)((char *)mes->buff + offset),
+                  (void *) &request->request[i]);
     }
     else
     {
       ret_val = MPI_Recv_init((char *)mes->buff + offset, request->size, mes->type, mes->partner, mes->tag + i, mes->comm, &request->request[i]);
       assert(MPI_SUCCESS == ret_val);
-      MPIPCL_DEBUG("Recv_init called");
+      MPIPCL_DEBUG("Recv_init called - buffer: %p - req pointers: %p\n",
+                  (void *)(void *)((char *)mes->buff + offset),
+                  (void *)&request->request[i]);
     }
 
     request->internal_status[i] = 0;
