@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
     printf("\n");
 
    /* Testsome -- see if incomplete request is returned (it shouldn't be) */
-   complete -1;
+   complete = -1;
    rc = MPIX_Testsome(NUMREQ, req, &complete, indices, MPI_STATUS_IGNORE);
    assert(rc == MPI_SUCCESS);
 

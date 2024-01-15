@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 
     #pragma omp parallel for shared(buf,req,sum) num_threads(nparts)
       for (i = 0; i < nparts; i++) {
-        int j, flag = 0, testflag; 
+        int j, flag = 0; 
         double mysum = 0.0;
         while (!flag) {
             /* check if partition has been received */
