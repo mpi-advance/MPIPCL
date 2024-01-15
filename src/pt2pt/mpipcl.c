@@ -53,7 +53,7 @@ int MPIX_Pready(int partition, MPIX_Request *request)
 
 int MPIX_Pready_range(int partition_low, int partition_high, MPIX_Request *request)
 {
-  for (int i = partition_low; i < partition_high; i++)
+  for (int i = partition_low; i <= partition_high; i++)
   {
     int ret_val = MPIX_Pready(i, request);
     assert(MPI_SUCCESS == ret_val);
@@ -74,7 +74,7 @@ int MPIX_Pready_list(int length, int array_of_partitions[], MPIX_Request *reques
 // calls functions from send.c
 int MPIX_Parrived(MPIX_Request *request, int partition, int *flag)
 {
-  assert(request->side != SENDER && request->state == ACTIVE);
+  assert(request->side != SENDER);
 
   pthread_mutex_lock(&request->lock);
   int status = request->threaded;
@@ -101,7 +101,7 @@ int MPIX_Parrived(MPIX_Request *request, int partition, int *flag)
 
 int MPIX_Start(MPIX_Request *request)
 {
-  MPIPCL_DEBUG("%d MPI START CALLED\n", request->side);
+  MPIPCL_DEBUG("MPIX START CALLED: %d\n", request->side);
   pthread_mutex_lock(&request->lock);
   enum Thread_Status thread_status = request->threaded;
   request->state = ACTIVE;
@@ -143,7 +143,7 @@ int MPIX_Startall(int count, MPIX_Request array_of_requests[])
 int MPIX_Wait(MPIX_Request *request, MPI_Status *status)
 {
   // if(request == NULL || request -> state == INACTIVE) {return MPI_SUCCESS;}
-  MPIPCL_DEBUG("%d Inside wait\n", request->side);
+  MPIPCL_DEBUG("Inside MPIX Wait: %d \n", request->side);
   pthread_mutex_lock(&request->lock);
   enum Thread_Status t_status = request->threaded;
   pthread_mutex_unlock(&request->lock);
@@ -156,6 +156,7 @@ int MPIX_Wait(MPIX_Request *request, MPI_Status *status)
   }
 
   // once setup is complete, wait on all internal partitions.
+  MPIPCL_DEBUG("Waiting on %d reqs at address %p\n", request->parts, (void *) request->request);
   int ret_val = MPI_Waitall(request->parts, request->request, MPI_STATUSES_IGNORE);
   assert(MPI_SUCCESS == ret_val);
 
@@ -168,6 +169,7 @@ int MPIX_Wait(MPIX_Request *request, MPI_Status *status)
 int MPIX_Waitall(int count, MPIX_Request array_of_requests[],
                  MPI_Status array_of_statuses[])
 {
+  MPIPCL_DEBUG("Will wait on: %d\n", count);
   for (int i = 0; i < count; i++)
   { /* NOTE: array of MPI_Status objects is not updated */
     int ret_val = MPIX_Wait(&array_of_requests[i], MPI_STATUS_IGNORE);
@@ -315,6 +317,9 @@ int MPIX_Request_free(MPIX_Request *request)
     int ret_val = MPI_Request_free(&request->request[i]);
     assert(MPI_SUCCESS == ret_val);
   }
+
+  // free request buffer
+  free(request->request);
 
   // free internal request status buffers
   free(request->local_status);

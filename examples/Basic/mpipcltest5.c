@@ -6,7 +6,7 @@
  * To compile:
  *    mpicc -O -Wall -fopenmp -o mpipcltest5 mpipcltest5.c mpipcl.c
  * To run:
- *    mpirun -np 5 ./mpipcltest5 <npartitions> <bufsize>
+ *    mpirun -np 2 ./mpipcltest5 <npartitions> <bufsize>
 
  *    NOTE: bufsize % npartitions == 0
  */
@@ -16,13 +16,12 @@
 #include <mpi.h>
 #include <omp.h>
 #include "mpipcl.h"
-
-//#define NUMREQ 2
+#include<unistd.h>
 
 int main(int argc, char *argv[]) {
-  int NUMREQ = 2;
-  int rank, size, nparts, bufsize, count; //tag = 0xbad;
-  int i=0, provided;
+  const int NUMREQ = 2;
+  int rank, size, nparts, bufsize, count, rc = 0;
+  int provided;
   double *buf, sum;
   MPIX_Request req[NUMREQ];
 
@@ -41,97 +40,109 @@ int main(int argc, char *argv[]) {
   bufsize = atoi(argv[2]);
   count = bufsize/nparts;
 
-
   if ((size != 2) || (bufsize % nparts != 0)) {
     printf("comm size must be 2 and bufsize must be divisible by nparts\n");
     MPI_Abort(MPI_COMM_WORLD, -1);
   }
 
-  assert((buf = malloc(sizeof(double) * bufsize)) != NULL);
+  buf = malloc(sizeof(double) * bufsize);
+  assert(buf != NULL);
+
+  /* init buffers */
+  for(int i = 0; i < bufsize;i++) {
+    if(rank != 0)
+      buf[i] = 0.0;
+    else
+      buf[i] = i + 1.0;
+  }
+  printf("buffer: %p\n", (void*) buf);
 
   if (rank == 0) { /* sender */
-
-	//make Num requests
-	for(int i = 0; i<NUMREQ; i++)
-		assert(MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, i, MPI_COMM_WORLD, MPI_INFO_NULL, &req[i]) == MPI_SUCCESS);
-
-    	/* initialize buffer */
-    	for (i = 0; i < bufsize; i++)
-       	buf[i] = i + 1.0;
-
-
-    	//start each request in queue seperately
-    	for(int j = 0; j<NUMREQ; j++){
-    	//start request
-    	assert(MPIX_Start(&req[j]) == MPI_SUCCESS);
-
-    	/* indicate buffer is ready */
-    	assert(MPIX_Pready_range(0, nparts-1, &req[j]) == MPI_SUCCESS);
-
-    	/* wait for first request to complete before starting next */
-    	assert(MPIX_Wait(&req[j], MPI_STATUSES_IGNORE) == MPI_SUCCESS);
+    /* make the requests */
+    for(int i = 0; i < NUMREQ; i++){
+      rc = MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, i, MPI_COMM_WORLD, MPI_INFO_NULL, &req[i]);
+      assert(rc == MPI_SUCCESS);
     }
 
-    /*Clean up*/
-    for (i = 0; i < NUMREQ; i++)
-       assert(MPIX_Request_free(&req[i]) == MPI_SUCCESS);
+    for(int j = 0; j<NUMREQ; j++){
+      /* start request */
+      rc = MPIX_Start(&req[j]);
+      assert(rc == MPI_SUCCESS);
 
+      /* indicate buffer is ready */
+      rc = MPIX_Pready_range(0, nparts-1, &req[j]);
+      assert(rc == MPI_SUCCESS);
 
+      /* wait for first request to complete before starting next */
+      rc = MPIX_Wait(&req[j], MPI_STATUSES_IGNORE);
+      assert(rc == MPI_SUCCESS);
 
-
+      /* clean up */
+      rc = MPIX_Request_free(&req[j]);
+      assert(rc == MPI_SUCCESS);
+    } 
   } else if(rank == 1){         /* receiver */
 
-    //clear buffers
-    for(int i = 0; i<bufsize;i++)
-    	buf[i] = 0.0;
+    /* make requests */
+    for(int i = 0; i < NUMREQ; i++){
+   	 rc = MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, i, MPI_COMM_WORLD, MPI_INFO_NULL, &req[i]);
+     assert(rc == MPI_SUCCESS);
+    }
 
-    //make requests
-    for(int i=0;i<NUMREQ; i++)
-   	 assert(MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, i, MPI_COMM_WORLD, MPI_INFO_NULL, &req[i]) == MPI_SUCCESS);
+    /* start all but last request */
+    for(int k = 0; k < NUMREQ-1; k++){
+   	 rc = MPIX_Start(&req[k]);
+     assert(rc == MPI_SUCCESS);
+    }
 
-    //start all but last request
-    for(int k=0; k<NUMREQ-1; k++)
-   	 assert(MPIX_Start(&req[k]) == MPI_SUCCESS);
-
-    //wait for a request to complete
+    /* wait for a request to complete */
     int indices[NUMREQ];
-    int complete; //number of complete requests
-    MPIX_Waitsome(NUMREQ, req, &complete, indices, MPI_STATUS_IGNORE);
-    printf("%d %d Wait complete \n", indices[0], complete);
-    for(int h=0;h<complete;h++)
+    int complete = -1; //number of complete requests
+    rc = MPIX_Waitsome(NUMREQ, req, &complete, indices, MPI_STATUS_IGNORE);
+    assert(rc == MPI_SUCCESS);
+
+    printf("Wait completed: %d (count: %d) \n", indices[0], complete);
+    for(int h = 0; h < complete; h++){
     	printf("%d ", indices[h]);
+      indices[h] = -1;
+    }
     printf("\n");
 
-   //Testsome -- see if incomplete request is returned (it shouldn't be)
-   MPIX_Testsome(NUMREQ, req, &complete, indices,MPI_STATUS_IGNORE);
-   printf("%d Test Complete \n", complete);
-   for(int i=0; i<complete; i++)
+   /* Testsome -- see if incomplete request is returned (it shouldn't be) */
+   complete -1;
+   rc = MPIX_Testsome(NUMREQ, req, &complete, indices, MPI_STATUS_IGNORE);
+   assert(rc == MPI_SUCCESS);
+
+   printf("Testsome complete count: %d \n", complete);
+   for(int i = 0; i < complete; i++)
    	printf("%d ",indices[i]);
    printf("\n");
 
-    //start final request
-    assert(MPIX_Start(&req[NUMREQ]) == MPI_SUCCESS);
+    /* start final request */
+    rc = MPIX_Start(&req[NUMREQ-1]);
+    assert(rc == MPI_SUCCESS);
 
-    //wait for first to complete
-    assert(MPIX_Waitall(NUMREQ, req, MPI_STATUS_IGNORE) == MPI_SUCCESS);
+    /* wait for second to complete */
+    rc = MPIX_Waitall(NUMREQ, req, MPI_STATUS_IGNORE);
+    assert(rc == MPI_SUCCESS);
     printf("Second request complete\n");
 
     /* compute the sum of the values received */
-    for (i = 0, sum = 0.0; i < bufsize; i++)
-   	sum += buf[i];
+    for (int i = 0, sum = 0.0; i < bufsize; i++)
+   	  sum += buf[i];
 
-    for(int j=0; j<NUMREQ; j++)
-    	assert(MPIX_Request_free(&req[j]) == MPI_SUCCESS);
+    for(int j = 0; j < NUMREQ; j++){
+      rc = MPIX_Request_free(&req[j]);
+      assert(rc == MPI_SUCCESS);
+    }
 
-    //assert(MPIX_Request_free(&req[1]) == MPI_SUCCESS);
     printf("[%d]: #partitions = %d bufsize = %d count = %d sum = %f (%f)\n",
            rank, nparts, bufsize, count, sum, ((double)bufsize*(bufsize+1))/2.0);
-
   }
 
   free(buf);
 
   MPI_Finalize();
 
-  return 0;
+  return rc;
 }

@@ -18,7 +18,7 @@
 #define NNEIGHBORS 4
 
 int main(int argc, char *argv[]) {
-  int rank, size, nparts, bufsize, count, tag = 0xbad;
+  int rank, size, nparts, bufsize, count, tag = 0xbad, rc = 0;
   int i, j, provided;
   double *buf, sum;
   MPIX_Request req[NNEIGHBORS];
@@ -42,34 +42,46 @@ int main(int argc, char *argv[]) {
     printf("comm size must be 5 and bufsize must be divisible by nparts\n");
     MPI_Abort(MPI_COMM_WORLD, -1);
   }
-  assert((buf = malloc(sizeof(double) * bufsize)) != NULL);
+  buf = malloc(sizeof(double) * bufsize);
+  assert(buf != NULL);
 
   if (rank == 0) { /* sender */
-    for (i = 1; i <= NNEIGHBORS; i++) 
-       assert(MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, i, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req[i-1]) == MPI_SUCCESS);
-    assert(MPIX_Startall(NNEIGHBORS, req) == MPI_SUCCESS);
+    for (i = 1; i <= NNEIGHBORS; i++){ 
+       rc = MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, i, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req[i-1]);
+       assert(rc == MPI_SUCCESS);
+    }
+
+    rc = MPIX_Startall(NNEIGHBORS, req);
+    assert(rc == MPI_SUCCESS);
     printf("[%d]: nparts = %d bufsize = %d count = %d size = %d\n",
            rank, nparts, bufsize, count, size);
 
     #pragma omp parallel for private(j) shared(buf,req) num_threads(nparts)
-    for (i = 0; i < nparts; i++) {
-       /* initialize part of buffer in each thread */
-       for (j = 0; j < count; j++) 
-          buf[j + i*count] = j + i*count + 1.0;
+      for (i = 0; i < nparts; i++) {
+        /* initialize part of buffer in each thread */
+        for (j = 0; j < count; j++) 
+            buf[j + i*count] = j + i*count + 1.0;
 
-       /* indicate buffer is ready for all sends */
-       for (j = 0; j < NNEIGHBORS; j++)
-	 assert(MPIX_Pready(i, &req[j]) == MPI_SUCCESS);
+        /* indicate buffer is ready for all sends */
+        for (j = 0; j < NNEIGHBORS; j++) {
+            rc = MPIX_Pready(i, &req[j]);
+            assert(rc == MPI_SUCCESS);
+        }
+      }
+
+    rc = MPIX_Waitall(NNEIGHBORS, req, MPI_STATUSES_IGNORE);
+    assert(rc == MPI_SUCCESS);
+    for (i = 0; i < NNEIGHBORS; i++){
+       rc = MPIX_Request_free(&req[i]);
+       assert(rc == MPI_SUCCESS);
     }
-
-    assert(MPIX_Waitall(NNEIGHBORS, req, MPI_STATUSES_IGNORE) == MPI_SUCCESS); 
-    for (i = 0; i < NNEIGHBORS; i++) 
-       assert(MPIX_Request_free(&req[i]) == MPI_SUCCESS);
   } else {         /* receiver */
     MPIX_Request req;
 
-    assert(MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req) == MPI_SUCCESS);
-    assert(MPIX_Start(&req) == MPI_SUCCESS);
+    rc = MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req);
+    assert(rc == MPI_SUCCESS);
+    rc = MPIX_Start(&req);
+    assert(rc == MPI_SUCCESS);
 
     #pragma omp parallel for shared(buf,req,sum) num_threads(nparts)
     for (i = 0; i < nparts; i++) {
@@ -77,7 +89,8 @@ int main(int argc, char *argv[]) {
        double mysum = 0.0;
        while (!flag) {
           /* check if partition has been received */
-          MPIX_Parrived(&req, i, &flag); 
+          rc = MPIX_Parrived(&req, i, &flag);
+          assert(rc == MPI_SUCCESS);
 
           if (flag) {
             /* compute the partial sum of the values received */
@@ -89,15 +102,18 @@ int main(int argc, char *argv[]) {
             sum += mysum;
           } else {
             /* do some other work */
-            MPIX_Test(&req, &testflag, MPI_STATUS_IGNORE);
+            rc = MPIX_Test(&req, &testflag, MPI_STATUS_IGNORE);
+            assert(rc == MPI_SUCCESS);
             /* do some other work based on testflag */
           }
        }
     }
-    assert(MPIX_Wait(&req, MPI_STATUS_IGNORE) == MPI_SUCCESS);
+    rc = MPIX_Wait(&req, MPI_STATUS_IGNORE);
+    assert(rc == MPI_SUCCESS);
     printf("[%d]: #partitions = %d bufsize = %d count = %d sum = %f (%f)\n", 
            rank, nparts, bufsize, count, sum, ((double)bufsize*(bufsize+1))/2.0);
-    assert(MPIX_Request_free(&req) == MPI_SUCCESS);
+    rc =MPIX_Request_free(&req);
+    assert(rc == MPI_SUCCESS);
   }
 
   free(buf);

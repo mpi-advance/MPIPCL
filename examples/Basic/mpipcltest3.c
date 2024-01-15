@@ -18,7 +18,7 @@
 #define NNEIGHBORS 4
 
 int main(int argc, char *argv[]) {
-  int rank, size, nparts, bufsize, count, tag = 0xbad;
+  int rank, size, nparts, bufsize, count, tag = 0xbad, rc = 0;
   int i, provided;
   double *buf, sum;
   MPIX_Request req[NNEIGHBORS];
@@ -38,16 +38,20 @@ int main(int argc, char *argv[]) {
   bufsize = atoi(argv[2]);
   count = bufsize/nparts;
 
-  if ((size != 5) || (bufsize % nparts != 0)) {
+  if ((size != (NNEIGHBORS+1)) || (bufsize % nparts != 0)) {
     printf("comm size must be 5 and bufsize must be divisible by nparts\n");
     MPI_Abort(MPI_COMM_WORLD, -1);
   }
-  assert((buf = malloc(sizeof(double) * bufsize)) != NULL);
+  buf = malloc(sizeof(double) * bufsize);
+  assert(buf != NULL);
 
   if (rank == 0) { /* sender */
-    for (i = 1; i <= NNEIGHBORS; i++) 
-       assert(MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, i, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req[i-1]) == MPI_SUCCESS);
-    assert(MPIX_Startall(NNEIGHBORS, req) == MPI_SUCCESS);
+    for (i = 1; i <= NNEIGHBORS; i++)
+    {
+      rc = MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, i, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req[i-1]);
+      assert(rc == MPI_SUCCESS);
+    }
+
     printf("[%d]: nparts = %d bufsize = %d count = %d size = %d\n",
            rank, nparts, bufsize, count, size);
 
@@ -55,24 +59,38 @@ int main(int argc, char *argv[]) {
     for (i = 0; i < bufsize; i++) 
        buf[i] = i + 1.0;
 
-    /* indicate buffer is ready */
-    for (i = 0; i < NNEIGHBORS; i++) 
-       assert(MPIX_Pready_range(0, nparts-1, &req[i]) == MPI_SUCCESS);
+   rc = MPIX_Startall(NNEIGHBORS, req);
+    assert(rc == MPI_SUCCESS);
 
-    assert(MPIX_Waitall(NNEIGHBORS, req, MPI_STATUSES_IGNORE) == MPI_SUCCESS); 
-    for (i = 0; i < NNEIGHBORS; i++) 
-       assert(MPIX_Request_free(&req[i]) == MPI_SUCCESS);
+    /* indicate buffer is ready */
+    for (i = 0; i < NNEIGHBORS; i++)
+    {
+       rc = MPIX_Pready_range(0, nparts-1, &req[i]);
+       assert(rc == MPI_SUCCESS);
+    }
+
+    rc = MPIX_Waitall(NNEIGHBORS, req, MPI_STATUSES_IGNORE); 
+    assert(rc == MPI_SUCCESS);
+    for (i = 0; i < NNEIGHBORS; i++)
+    {
+       rc = MPIX_Request_free(&req[i]);
+       assert(rc == MPI_SUCCESS);
+    }
   } else {         /* receiver */
 
-    assert(MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req[0]) == MPI_SUCCESS);
-    assert(MPIX_Start(&req[0]) == MPI_SUCCESS);
-    assert(MPIX_Wait(&req[0], MPI_STATUS_IGNORE) == MPI_SUCCESS);
+    rc = MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req[0]);
+    assert(rc == MPI_SUCCESS);
+    rc = MPIX_Start(&req[0]);
+    assert(rc == MPI_SUCCESS);
+    rc = MPIX_Wait(&req[0], MPI_STATUS_IGNORE);
+    assert(rc == MPI_SUCCESS);
 
     /* compute the sum of the values received */
     for (i = 0, sum = 0.0; i < bufsize; i++)
        sum += buf[i];
 
-    assert(MPIX_Request_free(&req[0]) == MPI_SUCCESS);
+    rc = MPIX_Request_free(&req[0]);
+    assert(rc == MPI_SUCCESS);
     printf("[%d]: #partitions = %d bufsize = %d count = %d sum = %f (%f)\n", 
            rank, nparts, bufsize, count, sum, ((double)bufsize*(bufsize+1))/2.0);
   }
@@ -80,5 +98,5 @@ int main(int argc, char *argv[]) {
   free(buf);
   MPI_Finalize();
 
-  return 0;
+  return rc;
 }

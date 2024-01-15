@@ -32,4 +32,4 @@ There are six examples provided by this library (found in the `examples/Basic` f
 
 The first, second, and sixth example programs require only two processes, while the third, fourth, and fifth example programs require five processes. Note that `bufsize % npartitions == 0` must be true for all examples and combinations of buffer sizes and number of partitions. The fifth test is testing all of the `MPIX_Wait\Test` functions and their variants.
 
-If `-DBUILD_EXAMPLES` is provided during the `cmake` command, the tests will also be built when building MPIPCL. 
+If `-DBUILD_EXAMPLES=ON` is provided during the `cmake` command, the tests will also be built when building MPIPCL. 
