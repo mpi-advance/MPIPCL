@@ -16,7 +16,6 @@
 #include <mpi.h>
 #include <omp.h>
 #include "mpipcl.h"
-#include<unistd.h>
 
 int main(int argc, char *argv[]) {
   const int NUMREQ = 2;
