@@ -182,6 +182,7 @@ int MPIX_Waitall(int count, MPIX_Request array_of_requests[],
 int MPIX_Waitany(int count, MPIX_Request array_of_requests[],
                  int *index, MPI_Status *status)
 {
+  MPIPCL_DEBUG("MPIX_Waitany\n");
   int flag = 0;
   while (!flag)
   {
@@ -204,6 +205,7 @@ int MPIX_Waitsome(int incount, MPIX_Request array_of_requests[],
                   int *outcount, int array_of_indices[],
                   MPI_Status array_of_statuses[])
 {
+  MPIPCL_DEBUG("MPIX_Waitsome\n");
   int j = 0, flag = 0;
 
   *outcount = 0;
@@ -231,6 +233,7 @@ int MPIX_Test(MPIX_Request *request, int *flag, MPI_Status *status)
 
   if (request == NULL || request->state == INACTIVE)
   {
+    MPIPCL_DEBUG("Early MPIX Test exit due to null or inactive request: %p\n", (void *) request);
     return MPI_SUCCESS;
   }
 
@@ -241,7 +244,7 @@ int MPIX_Test(MPIX_Request *request, int *flag, MPI_Status *status)
   // if not synced, return false
   if (t_status == 0)
   {
-    *flag = 0;
+    MPIPCL_DEBUG("Early MPIX Test exit due to not synched\n");
     return MPI_SUCCESS;
   }
 
@@ -259,6 +262,7 @@ int MPIX_Test(MPIX_Request *request, int *flag, MPI_Status *status)
 int MPIX_Testall(int count, MPIX_Request array_of_requests[],
                  int *flag, MPI_Status array_of_statuses[])
 {
+  MPIPCL_DEBUG("MPIX_Testall\n");
   int myflag;
   *flag = 1;
   for (int i = 0; i < count; i++)
@@ -274,6 +278,7 @@ int MPIX_Testall(int count, MPIX_Request array_of_requests[],
 
 int MPIX_Testany(int count, MPIX_Request array_of_requests[], int *index, int *flag, MPI_Status *status)
 {
+  MPIPCL_DEBUG("MPIX_Testany\n");
   // for each MPIX_request in provided array
   for (int i = 0; i < count; i++)
   {
@@ -292,6 +297,7 @@ int MPIX_Testsome(int incount, MPIX_Request array_of_requests[],
                   int *outcount, int array_of_indices[],
                   MPI_Status array_of_statuses[])
 {
+  MPIPCL_DEBUG("MPIX_Testsome\n");
   int j = 0, flag = 0;
   *outcount = 0;
   for (int i = 0; i < incount; i++)
