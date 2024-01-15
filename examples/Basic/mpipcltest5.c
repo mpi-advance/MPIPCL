@@ -14,14 +14,13 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <mpi.h>
-#include <omp.h>
 #include "mpipcl.h"
 
 int main(int argc, char *argv[]) {
   const int NUMREQ = 2;
   int rank, size, nparts, bufsize, count, rc = 0;
   int provided;
-  double *buf, sum;
+  double *buf;
   MPIX_Request req[NUMREQ];
 
   MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
@@ -63,7 +62,7 @@ int main(int argc, char *argv[]) {
       assert(rc == MPI_SUCCESS);
     }
 
-    for(int j = 0; j<NUMREQ; j++){
+    for(int j = 0; j < NUMREQ; j++){
       /* start request */
       rc = MPIX_Start(&req[j]);
       assert(rc == MPI_SUCCESS);
@@ -127,7 +126,8 @@ int main(int argc, char *argv[]) {
     printf("Second request complete\n");
 
     /* compute the sum of the values received */
-    for (int i = 0, sum = 0.0; i < bufsize; i++)
+    double sum = 0.0;
+    for (int i = 0; i < bufsize; i++)
    	  sum += buf[i];
 
     for(int j = 0; j < NUMREQ; j++){
@@ -140,7 +140,6 @@ int main(int argc, char *argv[]) {
   }
 
   free(buf);
-
   MPI_Finalize();
 
   return rc;
