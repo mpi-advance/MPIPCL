@@ -5,7 +5,7 @@
 // calls functions in sync.c
 
 // fill in default values and bundle message data
-void prep(void *buf, int partitions, MPI_Count count, MPI_Datatype datatype, int opp, int tag, MPI_Info info, MPI_Comm comm, MPIX_Request *request)
+void prep(void *buf, int partitions, MPI_Count count, MPI_Datatype datatype, int opp, int tag, MPI_Comm comm, MPIX_Request *request)
 {
   /* update partitioned request object with default values*/
   request->state = INACTIVE;
