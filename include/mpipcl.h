@@ -106,7 +106,7 @@ int MPIX_Request_free(MPIX_Request *request);
 
 // functions current defined outside of mpipcl
 // setup.c
-void prep(void *buf, int partitions, MPI_Count count, MPI_Datatype datatype, int opp, int tag, MPI_Info info, MPI_Comm comm, MPIX_Request *request);
+void prep(void *buf, int partitions, MPI_Count count, MPI_Datatype datatype, int opp, int tag, MPI_Comm comm, MPIX_Request *request);
 int sync_driver(MPI_Info info, MPIX_Request *request);
 void internal_setup(MPIX_Request *request);
 void reset_status(MPIX_Request *request);
@@ -122,9 +122,6 @@ void send_ready(MPIX_Request *request);
 void general_send(int id, MPIX_Request *request);
 
 // remap functions
-void map_send_buffer_percent(int id, MPIX_Request *request);
-void map_send_buffer_bool(int id, MPIX_Request *request);
-void map_send_buffer_count(int id, MPIX_Request *request);
 int map_recv_buffer(int id, MPIX_Request *request);
 
 // debug functions

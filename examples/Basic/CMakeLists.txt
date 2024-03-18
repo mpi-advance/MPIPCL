@@ -18,6 +18,9 @@ list(APPEND mpipcl_test_execs MPIPCL_Test_5)
 add_executable(MPIPCL_Test_6 mpipcltest6.c)
 list(APPEND mpipcl_test_execs MPIPCL_Test_6)
 
+add_executable(MPIPCL_Test_7 mpipcltest7.c)
+list(APPEND mpipcl_test_execs MPIPCL_Test_7)
+
 foreach(exec_target ${mpipcl_test_execs})
 	if(CMAKE_BUILD_TYPE MATCHES "DEBUG")
 		target_compile_options(${exec_target} PRIVATE -Wall -Wextra -Wpedantic)

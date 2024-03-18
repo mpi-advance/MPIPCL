@@ -7,7 +7,7 @@ int MPIX_Psend_init(void *buf, int partitions, MPI_Count count,
                     MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIX_Request *request)
 {
   request->side = SENDER;
-  prep(buf, partitions, count, datatype, dest, tag, info, comm, request);
+  prep(buf, partitions, count, datatype, dest, tag, comm, request);
   sync_driver(info, request);
 
   return MPI_SUCCESS;
@@ -18,7 +18,7 @@ int MPIX_Precv_init(void *buf, int partitions, MPI_Count count,
                     MPIX_Request *request)
 {
   request->side = RECEIVER;
-  prep(buf, partitions, count, datatype, dest, tag, info, comm, request);
+  prep(buf, partitions, count, datatype, dest, tag, comm, request);
   sync_driver(info, request);
 
   return MPI_SUCCESS;
