@@ -27,7 +27,9 @@ extern "C"
 #endif
 
 // Determines name of function based on "MPIPCL_UNIQUE_NAMES"
-#define MPIPCL(name) MPIPCL_NAMESPACE##name
+#define CONCAT(namespace, name) namespace ## name
+#define EXPAND(namespace, name) CONCAT(namespace, name)
+#define MPIPCL(name) EXPAND(MPIPCL_NAMESPACE, name)
 
 // structure to hold message settings if threaded sync is necessary
 typedef struct _meta_
