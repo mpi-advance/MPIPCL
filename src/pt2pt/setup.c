@@ -5,7 +5,7 @@
 // calls functions in sync.c
 
 // fill in default values and bundle message data
-void prep(void *buf, int partitions, MPI_Count count, MPI_Datatype datatype, int opp, int tag, MPI_Comm comm, MPIX_Request *request)
+void prep(void *buf, int partitions, MPI_Count count, MPI_Datatype datatype, int opp, int tag, MPI_Comm comm, MPIPCL_REQUEST *request)
 {
   /* update partitioned request object with default values*/
   request->state = INACTIVE;
@@ -39,7 +39,7 @@ void prep(void *buf, int partitions, MPI_Count count, MPI_Datatype datatype, int
 }
 
 // decode info object and call appropriate sync operation
-int sync_driver(MPI_Info info, MPIX_Request *request)
+int sync_driver(MPI_Info info, MPIPCL_REQUEST *request)
 {
   int flag;
   char mode[10];
@@ -112,7 +112,7 @@ int sync_driver(MPI_Info info, MPIX_Request *request)
 
 // setup internal requests and status control variables for request -- always needed.
 // Assumes that sync has been run and request->parts & request->size has been set.
-void internal_setup(MPIX_Request *request)
+void internal_setup(MPIPCL_REQUEST *request)
 {
   MPI_Aint lb, extent, offset;
   meta *mes = request->comm_data;
@@ -156,7 +156,7 @@ void internal_setup(MPIX_Request *request)
 }
 
 // initialize progress status in request.
-void reset_status(MPIX_Request *request)
+void reset_status(MPIPCL_REQUEST *request)
 {
   // reset internal flags
   for (int i = 0; i < request->parts; i++)

@@ -6,6 +6,7 @@ option(BUILD_STATIC_LIBS "Build MPIPCL static library." OFF)
 option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
 option(WITH_DEBUG "Turn debug statements on or off." OFF)
 option(BUILD_EXAMPLES "Turn on building of MPIPCL Examples." OFF)
+option(UNIQUE_NAMES "Changes the types and names of functions to MPIP instead of MPIX." OFF)
 
 ##### Create main project target: mpipcl #####
 add_library(mpipcl "")
@@ -38,6 +39,11 @@ endif()
 if(CMAKE_BUILD_TYPE MATCHES "RELEASE")
 	# add additional performance optimization for RELEASE
 	target_compile_options(mpipcl PRIVATE -funroll-loops)
+endif()
+
+if(UNIQUE_NAMES)
+	message(STATUS "Using MPIP instead of MPIX for APIs")
+	add_definitions( -DMPIPCL_UNIQUE_NAMES )
 endif()
 
 # Link MPI to project
