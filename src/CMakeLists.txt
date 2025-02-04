@@ -1,1 +1,2 @@
+add_subdirectory(bindings)
 add_subdirectory(pt2pt)

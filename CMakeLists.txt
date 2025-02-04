@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.17 FATAL_ERROR)
-project(MPIPCL VERSION 0.1 LANGUAGES C)
+project(MPIPCL VERSION 1.4.0 LANGUAGES C)
 
 ##### Available options #####
 option(BUILD_STATIC_LIBS "Build MPIPCL static library." OFF)
