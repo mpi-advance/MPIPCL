@@ -43,7 +43,8 @@ endif()
 
 if(UNIQUE_NAMES)
 	message(STATUS "Using MPIP instead of MPIX for APIs")
-	add_definitions( -DMPIPCL_UNIQUE_NAMES )
+	# PUBLIC target for both this library and anyone who uses it
+	target_compile_definitions (MPIPCL PUBLIC MPIPCL_UNIQUE_NAMES=1 )
 endif()
 
 # Link MPI to project
