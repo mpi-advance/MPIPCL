@@ -1,10 +1,15 @@
-/* Initial implementation of partitioned communication API */
-
 #include "mpipcl.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Initial implementation of partitioned communication API */
+
+
 // Init functions - call function in setup.c
-int MPIX_Psend_init(void *buf, int partitions, MPI_Count count,
-                    MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIX_Request *request)
+int MPIPCL(_Psend_init)(void *buf, int partitions, MPI_Count count,
+                    MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST *request)
 {
   request->side = SENDER;
   prep(buf, partitions, count, datatype, dest, tag, comm, request);
@@ -13,9 +18,9 @@ int MPIX_Psend_init(void *buf, int partitions, MPI_Count count,
   return MPI_SUCCESS;
 }
 
-int MPIX_Precv_init(void *buf, int partitions, MPI_Count count,
+int MPIPCL(_Precv_init)(void *buf, int partitions, MPI_Count count,
                     MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info,
-                    MPIX_Request *request)
+                    MPIPCL_REQUEST *request)
 {
   request->side = RECEIVER;
   prep(buf, partitions, count, datatype, dest, tag, comm, request);
@@ -24,7 +29,7 @@ int MPIX_Precv_init(void *buf, int partitions, MPI_Count count,
   return MPI_SUCCESS;
 }
 
-int MPIX_Pready(int partition, MPIX_Request *request)
+int MPIPCL(_Pready)(int partition, MPIPCL_REQUEST *request)
 {
   MPIPCL_DEBUG("INSIDE PREADY\n");
   // check for calling conditions
@@ -51,28 +56,28 @@ int MPIX_Pready(int partition, MPIX_Request *request)
   return MPI_SUCCESS;
 }
 
-int MPIX_Pready_range(int partition_low, int partition_high, MPIX_Request *request)
+int MPIPCL(_Pready_range)(int partition_low, int partition_high, MPIPCL_REQUEST *request)
 {
   for (int i = partition_low; i <= partition_high; i++)
   {
-    int ret_val = MPIX_Pready(i, request);
+    int ret_val = MPIPCL(_Pready)(i, request);
     assert(MPI_SUCCESS == ret_val);
   }
   return MPI_SUCCESS;
 }
 
-int MPIX_Pready_list(int length, int array_of_partitions[], MPIX_Request *request)
+int MPIPCL(_Pready_list)(int length, int array_of_partitions[], MPIPCL_REQUEST *request)
 {
   for (int i = 0; i < length; i++)
   {
-    int ret_val = MPIX_Pready(array_of_partitions[i], request);
+    int ret_val = MPIPCL(_Pready)(array_of_partitions[i], request);
     assert(MPI_SUCCESS == ret_val);
   }
   return MPI_SUCCESS;
 }
 
 // calls functions from send.c
-int MPIX_Parrived(MPIX_Request *request, int partition, int *flag)
+int MPIPCL(_Parrived)(MPIPCL_REQUEST *request, int partition, int *flag)
 {
   assert(request->side != SENDER);
 
@@ -99,7 +104,7 @@ int MPIX_Parrived(MPIX_Request *request, int partition, int *flag)
   return MPI_SUCCESS;
 }
 
-int MPIX_Start(MPIX_Request *request)
+int MPIPCL(_Start)(MPIPCL_REQUEST *request)
 {
   MPIPCL_DEBUG("MPIX START CALLED: %d\n", request->side);
   pthread_mutex_lock(&request->lock);
@@ -128,11 +133,11 @@ int MPIX_Start(MPIX_Request *request)
   return MPI_SUCCESS;
 }
 
-int MPIX_Startall(int count, MPIX_Request array_of_requests[])
+int MPIPCL(_Startall)(int count, MPIPCL_REQUEST array_of_requests[])
 {
   for (int i = 0; i < count; i++)
   {
-    int ret_val = MPIX_Start(&array_of_requests[i]);
+    int ret_val = MPIPCL(_Start)(&array_of_requests[i]);
     assert(MPI_SUCCESS == ret_val);
   }
 
@@ -140,7 +145,7 @@ int MPIX_Startall(int count, MPIX_Request array_of_requests[])
 }
 
 // Other Wait function calls basic test, modifying MPIX_Wait will propagate the changes.
-int MPIX_Wait(MPIX_Request *request, MPI_Status *status)
+int MPIPCL(_Wait)(MPIPCL_REQUEST *request, MPI_Status *status)
 {
   // if(request == NULL || request -> state == INACTIVE) {return MPI_SUCCESS;}
   MPIPCL_DEBUG("Inside MPIX Wait: %d \n", request->side);
@@ -166,20 +171,20 @@ int MPIX_Wait(MPIX_Request *request, MPI_Status *status)
   return MPI_SUCCESS;
 }
 
-int MPIX_Waitall(int count, MPIX_Request array_of_requests[],
+int MPIPCL(_Waitall)(int count, MPIPCL_REQUEST array_of_requests[],
                  MPI_Status array_of_statuses[])
 {
   MPIPCL_DEBUG("Will wait on: %d\n", count);
   for (int i = 0; i < count; i++)
   { /* NOTE: array of MPI_Status objects is not updated */
-    int ret_val = MPIX_Wait(&array_of_requests[i], MPI_STATUS_IGNORE);
+    int ret_val = MPIPCL(_Wait)(&array_of_requests[i], MPI_STATUS_IGNORE);
     assert(MPI_SUCCESS == ret_val);
   }
 
   return MPI_SUCCESS;
 }
 
-int MPIX_Waitany(int count, MPIX_Request array_of_requests[],
+int MPIPCL(_Waitany)(int count, MPIPCL_REQUEST array_of_requests[],
                  int *index, MPI_Status *status)
 {
   MPIPCL_DEBUG("MPIX_Waitany\n");
@@ -188,7 +193,7 @@ int MPIX_Waitany(int count, MPIX_Request array_of_requests[],
   {
     for (int i = 0; i < count; i++)
     { /* NOTE: MPI_Status object is not updated */
-      int ret_val = MPIX_Test(&array_of_requests[i], &flag, MPI_STATUS_IGNORE);
+      int ret_val = MPIPCL(_Test)(&array_of_requests[i], &flag, MPI_STATUS_IGNORE);
       assert(MPI_SUCCESS == ret_val);
       if (flag == 1)
       {
@@ -201,7 +206,7 @@ int MPIX_Waitany(int count, MPIX_Request array_of_requests[],
   return MPI_SUCCESS;
 }
 
-int MPIX_Waitsome(int incount, MPIX_Request array_of_requests[],
+int MPIPCL(_Waitsome)(int incount, MPIPCL_REQUEST array_of_requests[],
                   int *outcount, int array_of_indices[],
                   MPI_Status array_of_statuses[])
 {
@@ -213,7 +218,7 @@ int MPIX_Waitsome(int incount, MPIX_Request array_of_requests[],
   {
     for (int i = 0; i < incount; i++)
     {
-      int ret_val = MPIX_Test(&array_of_requests[i], &flag, MPI_STATUS_IGNORE);
+      int ret_val = MPIPCL(_Test)(&array_of_requests[i], &flag, MPI_STATUS_IGNORE);
       assert(MPI_SUCCESS == ret_val);
       if (flag == 1)
       {
@@ -227,7 +232,7 @@ int MPIX_Waitsome(int incount, MPIX_Request array_of_requests[],
 }
 
 // Other test function calls basic test, modifying MPIX_Test will propagate the changes.
-int MPIX_Test(MPIX_Request *request, int *flag, MPI_Status *status)
+int MPIPCL(_Test)(MPIPCL_REQUEST *request, int *flag, MPI_Status *status)
 {
   *flag = 0;
 
@@ -259,7 +264,7 @@ int MPIX_Test(MPIX_Request *request, int *flag, MPI_Status *status)
   return MPI_SUCCESS;
 }
 
-int MPIX_Testall(int count, MPIX_Request array_of_requests[],
+int MPIPCL(_Testall)(int count, MPIPCL_REQUEST array_of_requests[],
                  int *flag, MPI_Status array_of_statuses[])
 {
   MPIPCL_DEBUG("MPIX_Testall\n");
@@ -267,7 +272,7 @@ int MPIX_Testall(int count, MPIX_Request array_of_requests[],
   *flag = 1;
   for (int i = 0; i < count; i++)
   {
-    int ret_val = MPIX_Test(&array_of_requests[i], &myflag, MPI_STATUS_IGNORE);
+    int ret_val = MPIPCL(_Test)(&array_of_requests[i], &myflag, MPI_STATUS_IGNORE);
     assert(MPI_SUCCESS == ret_val);
     *flag = *flag & myflag;
   }
@@ -276,13 +281,13 @@ int MPIX_Testall(int count, MPIX_Request array_of_requests[],
   return MPI_SUCCESS;
 }
 
-int MPIX_Testany(int count, MPIX_Request array_of_requests[], int *index, int *flag, MPI_Status *status)
+int MPIPCL(_Testany)(int count, MPIPCL_REQUEST array_of_requests[], int *index, int *flag, MPI_Status *status)
 {
   MPIPCL_DEBUG("MPIX_Testany\n");
-  // for each MPIX_request in provided array
+  // for each MPIPCL_REQUEST in provided array
   for (int i = 0; i < count; i++)
   {
-    int ret_val = MPIX_Test(&array_of_requests[i], flag, MPI_STATUS_IGNORE);
+    int ret_val = MPIPCL(_Test)(&array_of_requests[i], flag, MPI_STATUS_IGNORE);
     assert(MPI_SUCCESS == ret_val);
     if (*flag == 1)
     {
@@ -293,7 +298,7 @@ int MPIX_Testany(int count, MPIX_Request array_of_requests[], int *index, int *f
   return MPI_SUCCESS;
 }
 
-int MPIX_Testsome(int incount, MPIX_Request array_of_requests[],
+int MPIPCL(_Testsome)(int incount, MPIPCL_REQUEST array_of_requests[],
                   int *outcount, int array_of_indices[],
                   MPI_Status array_of_statuses[])
 {
@@ -302,7 +307,7 @@ int MPIX_Testsome(int incount, MPIX_Request array_of_requests[],
   *outcount = 0;
   for (int i = 0; i < incount; i++)
   {
-    int ret_val = MPIX_Test(&array_of_requests[i], &flag, MPI_STATUS_IGNORE);
+    int ret_val = MPIPCL(_Test)(&array_of_requests[i], &flag, MPI_STATUS_IGNORE);
     assert(MPI_SUCCESS == ret_val);
     if (flag == 1)
     {
@@ -315,7 +320,7 @@ int MPIX_Testsome(int incount, MPIX_Request array_of_requests[],
 }
 
 // cleanup function
-int MPIX_Request_free(MPIX_Request *request)
+int MPIPCL(_Request_free)(MPIPCL_REQUEST *request)
 {
   // clear internal array of requests
   for (int i = 0; i < request->parts; i++)
@@ -340,3 +345,7 @@ int MPIX_Request_free(MPIX_Request *request)
 
   return MPI_SUCCESS;
 }
+
+#ifdef __cplusplus
+}
+#endif

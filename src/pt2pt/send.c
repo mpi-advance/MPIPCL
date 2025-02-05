@@ -4,7 +4,7 @@
 
 // call send function on all marked partitions
 // catchup function for sync thread.
-void send_ready(MPIX_Request *request)
+void send_ready(MPIPCL_REQUEST *request)
 {
 	// call send on each currently marked partition
 	for (int i = 0; i < request->local_parts; i++)
@@ -16,7 +16,7 @@ void send_ready(MPIX_Request *request)
 	}
 }
 
-static inline void map_local_partition(int user_partition_id, MPIX_Request* request, int* start, int* end)
+static inline void map_local_partition(int user_partition_id, MPIPCL_REQUEST* request, int* start, int* end)
 {
 	int user_partitions = request->local_parts;
 	int network_partitions = request->parts;
@@ -34,7 +34,7 @@ static inline void map_local_partition(int user_partition_id, MPIX_Request* requ
 }
 
 // given partition id, send now ready internal requests.
-void general_send(int id, MPIX_Request *request)
+void general_send(int id, MPIPCL_REQUEST *request)
 {
 	int start_part, end_part;
 	map_local_partition(id, request, &start_part, &end_part);
@@ -62,7 +62,7 @@ void general_send(int id, MPIX_Request *request)
 // maps recv_buffer offset -- parried related.
 // returns 1 if ready, 0 otherwise.
 // all results from race condition identical, no lock needed.
-int map_recv_buffer(int id, MPIX_Request *request)
+int map_recv_buffer(int id, MPIPCL_REQUEST *request)
 {
 	if (request->local_status[id] == true)
 	{

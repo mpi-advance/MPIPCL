@@ -1,20 +1,21 @@
 cmake_minimum_required (VERSION 3.17 FATAL_ERROR)
-project(MPIPCL VERSION 0.1 LANGUAGES C)
+project(MPIPCL VERSION 1.4.0 LANGUAGES C)
 
 ##### Available options #####
 option(BUILD_STATIC_LIBS "Build MPIPCL static library." OFF)
 option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
 option(WITH_DEBUG "Turn debug statements on or off." OFF)
 option(BUILD_EXAMPLES "Turn on building of MPIPCL Examples." OFF)
+option(UNIQUE_NAMES "Changes the types and names of functions to MPIP instead of MPIX." OFF)
 
-##### Create main project target: mpipcl #####
-add_library(mpipcl "")
+##### Create main project target: MPIPCL #####
+add_library(MPIPCL "")
 
-set_target_properties(mpipcl PROPERTIES LINKER_LANGUAGE C)
-set_target_properties(mpipcl PROPERTIES VERSION ${PROJECT_VERSION})
-set_target_properties(mpipcl PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
-set_target_properties(mpipcl PROPERTIES PUBLIC_HEADER include/mpipcl.h)
-set_target_properties(mpipcl PROPERTIES C_STANDARD 99)
+set_target_properties(MPIPCL PROPERTIES LINKER_LANGUAGE C)
+set_target_properties(MPIPCL PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(MPIPCL PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
+set_target_properties(MPIPCL PROPERTIES PUBLIC_HEADER include/mpipcl.h)
+set_target_properties(MPIPCL PROPERTIES C_STANDARD 99)
 
 # set compile options for project
 
@@ -37,14 +38,20 @@ endif()
 
 if(CMAKE_BUILD_TYPE MATCHES "RELEASE")
 	# add additional performance optimization for RELEASE
-	target_compile_options(mpipcl PRIVATE -funroll-loops)
+	target_compile_options(MPIPCL PRIVATE -funroll-loops)
+endif()
+
+if(UNIQUE_NAMES)
+	message(STATUS "Using MPIP instead of MPIX for APIs")
+	# PUBLIC target for both this library and anyone who uses it
+	target_compile_definitions (MPIPCL PUBLIC MPIPCL_UNIQUE_NAMES=1 )
 endif()
 
 # Link MPI to project
 find_package(MPI REQUIRED)
-target_link_libraries(mpipcl MPI::MPI_C)
+target_link_libraries(MPIPCL MPI::MPI_C)
 find_package(Threads REQUIRED)
-target_link_libraries(mpipcl Threads::Threads)
+target_link_libraries(MPIPCL Threads::Threads)
 
 ##### traverse subdirectories #####
 add_subdirectory(src)
@@ -54,9 +61,38 @@ if(BUILD_EXAMPLES)
 endif()
 
 ##### install mpipcl #####
-install(
-	TARGETS mpipcl
+install(TARGETS MPIPCL
+	EXPORT MPIPCLTargets
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib
 	PUBLIC_HEADER DESTINATION include
+)
+
+
+##### Code for CMake Packaging
+include(CMakePackageConfigHelpers)
+
+## Version file
+write_basic_package_version_file(
+	${CMAKE_CURRENT_BINARY_DIR}/mpipcl-config-version.cmake
+	COMPATIBILITY AnyNewerVersion
+)
+
+# Create the configuration file
+configure_package_config_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/cmake/mpipcl-config.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/mpipcl-config.cmake
+	INSTALL_DESTINATION share/mpipcl
+)
+
+install(FILES
+	${CMAKE_CURRENT_BINARY_DIR}/mpipcl-config-version.cmake
+	${CMAKE_CURRENT_BINARY_DIR}/mpipcl-config.cmake
+	DESTINATION share/mpipcl
+)
+
+# Install everything
+install(EXPORT MPIPCLTargets
+	NAMESPACE MPIPCL::
+	DESTINATION share/mpipcl
 )

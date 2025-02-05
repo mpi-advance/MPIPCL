@@ -1,14 +1,14 @@
 #include "mpipcl.h"
 // implemented synchronization modes
 
-void sync_hard(int option, MPIX_Request *request)
+void sync_hard(int option, MPIPCL_REQUEST *request)
 {
 	request->parts = option;
 	request->size = request->local_parts * request->local_size / option;
 }
 
 // Send/Receive sync data to/from partner thread
-void sync_side(enum P2P_Side driver, MPIX_Request *request)
+void sync_side(enum P2P_Side driver, MPIPCL_REQUEST *request)
 {
 	// extract comm data from meta block
 	int partner = request->comm_data->partner;
@@ -38,7 +38,7 @@ void sync_side(enum P2P_Side driver, MPIX_Request *request)
 void *threaded_sync_driver(void *args)
 {
 	// Convert blob to correct type
-	MPIX_Request *request = (MPIX_Request *)args;
+	MPIPCL_REQUEST *request = (MPIPCL_REQUEST *)args;
 
 	sync_side(!request->side, request);
 	internal_setup(request);
