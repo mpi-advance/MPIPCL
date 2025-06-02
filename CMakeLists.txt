@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 3.17 FATAL_ERROR)
 project(MPIPCL VERSION 1.4.0 LANGUAGES C)
 
 ##### Available options #####
-option(BUILD_STATIC_LIBS "Build MPIPCL static library." OFF)
 option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
 option(WITH_DEBUG "Turn debug statements on or off." OFF)
 option(BUILD_EXAMPLES "Turn on building of MPIPCL Examples." OFF)
