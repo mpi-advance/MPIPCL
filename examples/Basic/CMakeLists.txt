@@ -1,4 +1,6 @@
 set(mpipcl_test_execs "")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
 
 add_executable(MPIPCL_Test_1 mpipcltest1.c)
 list(APPEND mpipcl_test_execs MPIPCL_Test_1)
@@ -27,6 +29,8 @@ foreach(exec_target ${mpipcl_test_execs})
 	endif()
 	target_include_directories(${exec_target} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(${exec_target} PUBLIC MPI::MPI_C)
-    target_link_libraries(${exec_target} PUBLIC MPIPCL)
+    	target_link_libraries(${exec_target} PUBLIC MPIPCL)
 	target_link_libraries(${exec_target} PUBLIC Threads::Threads)
+	install(TARGETS ${exec_target})
+	
 endforeach()
