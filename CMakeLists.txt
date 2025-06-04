@@ -1,10 +1,12 @@
 cmake_minimum_required (VERSION 3.17 FATAL_ERROR)
 project(MPIPCL VERSION 1.4.0 LANGUAGES C)
+include(CMakeDependentOption)
 
 ##### Available options #####
 option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
 option(WITH_DEBUG "Turn debug statements on or off." OFF)
 option(BUILD_EXAMPLES "Turn on building of MPIPCL Examples." OFF)
+cmake_dependent_option(EXAMPLES_TO_BIN "Create examples in <install>/bin. requires BUILD_EXAMPLES" OFF "BUILD_EXAMPLES" OFF)
 option(UNIQUE_NAMES "Changes the types and names of functions to MPIP instead of MPIX." OFF)
 
 ##### Create main project target: MPIPCL #####
