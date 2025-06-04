@@ -92,13 +92,7 @@ int MPIPCL(_Parrived)(MPIPCL_REQUEST *request, int partition, int *flag)
     return MPI_SUCCESS;
   }
 
-  // if 1 to 1 map use shortcut
-  if (request->local_parts == request->parts)
-  {
-    return MPI_Test(&request->request[partition], flag, MPI_STATUS_IGNORE);
-  }
-
-  // else use mapping function.
+  // else use mapping function to check status
   *flag = map_recv_buffer(partition, request);
 
   return MPI_SUCCESS;

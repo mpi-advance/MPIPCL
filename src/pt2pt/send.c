@@ -16,17 +16,15 @@ void send_ready(MPIPCL_REQUEST *request)
 	}
 }
 
-static inline void map_local_partition(int user_partition_id, MPIPCL_REQUEST* request, int* start, int* end)
+static inline void map_local_to_network_partitions(int user_partition_id, MPIPCL_REQUEST* request, int* start, int* end)
 {
 	int user_partitions = request->local_parts;
 	int network_partitions = request->parts;
 
-	// MPIPCL_DEBUG("User %d Network %d \n",user_partitions, network_partitions);
-
 	int temp_start = (network_partitions / user_partitions) * user_partition_id;
-	int temp_end   = ceil(network_partitions / user_partitions) * user_partition_id+1;
+	int temp_end   = ceil(network_partitions / user_partitions) * (user_partition_id + 1);
 
-	MPIPCL_DEBUG("Start %d End %d \n",temp_start, temp_end);
+	MPIPCL_DEBUG("Partition %d - Start %d End %d \n", user_partition_id, temp_start, temp_end);
 	assert(temp_start >= 0 && temp_end > temp_start && temp_end <= network_partitions);
 
 	*start = temp_start;
@@ -36,17 +34,32 @@ static inline void map_local_partition(int user_partition_id, MPIPCL_REQUEST* re
 // given partition id, send now ready internal requests.
 void general_send(int id, MPIPCL_REQUEST *request)
 {
-	int start_part, end_part;
-	map_local_partition(id, request, &start_part, &end_part);
+	int start_part = 0;
+	int end_part   = 0;
+	int threshold  = 0;
+	MPIPCL_DEBUG("User Partitions %d - Network Partitions %d\n", request->local_parts, request->parts);
+	if(request->local_parts <= request->parts)
+	{
+		map_local_to_network_partitions(id, request, &start_part, &end_part);
+		threshold = 1;
+	}
+	else /* Must be: if(request->local_parts > request->parts) */
+	{
+		threshold = request->local_parts / request->parts;
+		start_part = id / threshold;
+		end_part   = start_part+1;
+	}
 
-	// for each internal request effected
+	MPIPCL_DEBUG("User Partition %d - Start %d End %d \n", id, start_part, end_part);
+
+	pthread_mutex_lock(&request->lock);
+	// for each internal request affected
 	for (int i = start_part; i < end_part; i++)
 	{
 		// increase the number of "local" partitions ready
 		request->internal_status[i]++;
 
-		int threshold = request->local_parts / request->parts;
-		MPIPCL_DEBUG("Count: %d, Threshold: %d\n", request->internal_status[i], threshold);
+		MPIPCL_DEBUG("Network Partition %d - Count: %d, Threshold: %d\n", i, request->internal_status[i], threshold);
 
 		// if the number of local partitions needed for one network partition are ready
 		if (request->internal_status[i] == threshold)
@@ -57,6 +70,7 @@ void general_send(int id, MPIPCL_REQUEST *request)
 			assert(MPI_SUCCESS == ret_val);
 		}
 	}
+	pthread_mutex_unlock(&request->lock);
 }
 
 // maps recv_buffer offset -- parried related.
@@ -69,11 +83,23 @@ int map_recv_buffer(int id, MPIPCL_REQUEST *request)
 		return 1;
 	}
 
-	int start, end;
-	map_local_partition(id, request, &start, &end);
+	int start = 0;
+	int end = 0;
+	if(request->local_parts <= request->parts)
+	{
+		map_local_to_network_partitions(id, request, &start, &end);
+	}
+	else
+	{
+		int threshold = request->local_parts / request->parts;
+		start = id / threshold;
+		end   = start+1;
+	}
 
 	// check status of dependent requests
 	int flag = 0;
+	MPIPCL_DEBUG("User Partitions %d - Network Partitions %d\n", request->local_parts, request->parts);
+	MPIPCL_DEBUG("Checking Requests: [%d: %d)\n", start, end);
 	int ret_val = MPI_Testall(end - start, &request->request[start], &flag, MPI_STATUSES_IGNORE);
 	assert(MPI_SUCCESS == ret_val);
 
