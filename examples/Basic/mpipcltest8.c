@@ -1,16 +1,10 @@
-/* Sample program to test the partitioned communication API.
- * This version uses threads on the send-side only, but allows
- * users to change the behind the scenes mode of partition
- * negotiation.
- *
+/* Program that tests most of the MPIPCL APIs, using 
+ * the "HARD" mode. This the MPI INFO flag that tells
+ * MPIPCL to use a hard-coded number of partitions (the
+ * value in the corresponding INFO key).
+ * 
  * To run:
- *    mpirun -np 2 ./<test> <npartitions> <bufsize> <mode>
- *    WHERE <mode> = 0 MPI_INFO_NULL -- library default)
- *                   1 PMODE = SENDER -- sender's partitions
- *                   2 PMODE = RECEIVER -- receiver's partitions
- *                   3 PMODE = HARD  -- a specific number chosen,
- *                              controlled by "HARD_NUMBER" below
- *    NOTE: bufsize % npartitions == 0
+ *    mpirun -np 2 ./<test>
  */
 #include <stdio.h>
 #include <stdlib.h>
