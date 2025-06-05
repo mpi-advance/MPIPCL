@@ -2,7 +2,6 @@ cmake_minimum_required (VERSION 3.17 FATAL_ERROR)
 project(MPIPCL VERSION 1.4.0 LANGUAGES C)
 
 ##### Available options #####
-option(BUILD_STATIC_LIBS "Build MPIPCL static library." OFF)
 option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
 option(WITH_DEBUG "Turn debug statements on or off." OFF)
 option(BUILD_EXAMPLES "Turn on building of MPIPCL Examples." OFF)
@@ -27,9 +26,9 @@ endif()
 
 if(CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	# add additional debug flags for DEBUG
-	target_compile_options(mpipcl PRIVATE -Wall -Wextra -Wpedantic)
-	target_compile_options(mpipcl PRIVATE -Wno-unused-parameter)
-	target_compile_options(mpipcl PRIVATE -ggdb)
+	target_compile_options(MPIPCL PRIVATE -Wall -Wextra -Wpedantic)
+	target_compile_options(MPIPCL PRIVATE -Wno-unused-parameter)
+	target_compile_options(MPIPCL PRIVATE -ggdb)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES "DEBUG" OR WITH_DEBUG)
