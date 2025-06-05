@@ -65,7 +65,11 @@ typedef struct _mpipcl_request
   enum Activation state;
   enum P2P_Side side;
   bool *local_status;   // status array - true if external partition is ready
+  #ifdef __cplusplus
+  void* internal_status; // C++ can't use "atomic_int" from C, so let's just make it void *
+  #else
   atomic_int *internal_status; // status array - true if internal partition is ready
+  #endif
   bool *complete;       // status array - true if internal request has been started.
 
   int local_parts; // number of partitions visible externally
