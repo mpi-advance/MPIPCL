@@ -13,17 +13,14 @@
 #include <omp.h>
 #include "mpipcl.h"
 
-static inline void exchange(int rank, int nparts, MPI_Info the_info)
+static inline void exchange(int rank, double* buf, int bufsize, int nparts, MPI_Info the_info)
 {
     int i, j;
     int tag = 0xbad;
     MPIX_Request req;
     MPI_Status status;
 
-    int bufsize = nparts*(nparts/2)*(nparts*2);
     int count = bufsize / nparts;
-    double* buf = malloc(sizeof(double) * bufsize);
-
     if (0 == rank)
     { /* sender */
         MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD, the_info, &req);
@@ -67,7 +64,6 @@ static inline void exchange(int rank, int nparts, MPI_Info the_info)
                nparts, bufsize, count, sum);
     }
     MPIX_Request_free(&req);
-    free(buf);
 }
 
 int main(int argc, char *argv[])
@@ -92,6 +88,9 @@ int main(int argc, char *argv[])
     HARD_NUMBER[1] = '\0';
     int nparts = atoi(HARD_NUMBER);
 
+    int bufsize = nparts*(nparts/2)*(nparts*2);
+    double* buf = malloc(sizeof(double) * bufsize);
+
     MPI_Info the_info;
     MPI_Info_create(&the_info);
     MPI_Info_set(the_info, "PMODE", "HARD");
@@ -101,24 +100,25 @@ int main(int argc, char *argv[])
     {
         printf("Testing partitions equal to \"HARD\" preset: %d\n", nparts);
     }
-    exchange(rank, nparts, the_info);
+    exchange(rank, buf, bufsize, nparts, the_info);
 
     nparts = nparts*2;
     if(1 == rank)
     {
         printf("Testing partitions equal to 2x \"HARD\" preset: %d\n", nparts);
     }
-    exchange(rank, nparts, the_info);
+    exchange(rank, buf, bufsize, nparts, the_info);
 
     nparts = nparts/4;
     if(1 == rank)
     {
         printf("Testing partitions equal to 1/2 \"HARD\" preset: %d\n", nparts);
     }
-    exchange(rank, nparts, the_info);
+    exchange(rank, buf, bufsize, nparts, the_info);
 
     MPI_Info_free(&the_info);
 
+    free(buf);
     free(HARD_NUMBER);
     MPI_Finalize();
 
