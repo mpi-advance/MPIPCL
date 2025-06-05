@@ -52,17 +52,16 @@ void general_send(int id, MPIPCL_REQUEST *request)
 
 	MPIPCL_DEBUG("User Partition %d - Start %d End %d \n", id, start_part, end_part);
 
-	pthread_mutex_lock(&request->lock);
 	// for each internal request affected
 	for (int i = start_part; i < end_part; i++)
 	{
-		// increase the number of "local" partitions ready
-		request->internal_status[i]++;
+		// increase the number of "local" partitions ready (using atomics)
+		int prior_value = atomic_fetch_add_explicit(&request->internal_status[i], 1, memory_order_relaxed);
 
-		MPIPCL_DEBUG("Network Partition %d - Count: %d, Threshold: %d\n", i, request->internal_status[i], threshold);
+		MPIPCL_DEBUG("Network Partition %d - Count: %d, Threshold: %d\n", i, prior_value+1, threshold);
 
 		// if the number of local partitions needed for one network partition are ready
-		if (request->internal_status[i] == threshold)
+		if (prior_value + 1 == threshold)
 		{
 			// start associated request
 			MPIPCL_DEBUG("Starting request %d %p \n", i, (void *) (&request->request[i]));
@@ -70,7 +69,6 @@ void general_send(int id, MPIPCL_REQUEST *request)
 			assert(MPI_SUCCESS == ret_val);
 		}
 	}
-	pthread_mutex_unlock(&request->lock);
 }
 
 // maps recv_buffer offset -- parried related.

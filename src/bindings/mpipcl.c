@@ -82,11 +82,11 @@ int MPIPCL(_Parrived)(MPIPCL_REQUEST *request, int partition, int *flag)
   assert(request->side != SENDER);
 
   pthread_mutex_lock(&request->lock);
-  int status = request->threaded;
+  enum Thread_Status status = request->threaded;
   pthread_mutex_unlock(&request->lock);
 
   // if not synced - return early;
-  if (status == 0)
+  if (status == RUNNING)
   {
     *flag = 0;
     return MPI_SUCCESS;

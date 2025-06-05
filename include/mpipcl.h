@@ -14,6 +14,7 @@ extern "C"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdatomic.h>
 #include <assert.h>
 
 #define MPIPCL_TAG_LENGTH 20
@@ -64,7 +65,7 @@ typedef struct _mpipcl_request
   enum Activation state;
   enum P2P_Side side;
   bool *local_status;   // status array - true if external partition is ready
-  int *internal_status; // status array - true if internal partition is ready
+  atomic_int *internal_status; // status array - true if internal partition is ready
   bool *complete;       // status array - true if internal request has been started.
 
   int local_parts; // number of partitions visible externally
