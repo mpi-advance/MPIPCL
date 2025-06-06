@@ -14,7 +14,9 @@ extern "C"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef __cplusplus
 #include <stdatomic.h>
+#endif
 #include <assert.h>
 
 #define MPIPCL_TAG_LENGTH 20

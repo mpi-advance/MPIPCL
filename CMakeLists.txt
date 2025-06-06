@@ -14,7 +14,7 @@ set_target_properties(MPIPCL PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(MPIPCL PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(MPIPCL PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
 set_target_properties(MPIPCL PROPERTIES PUBLIC_HEADER include/mpipcl.h)
-set_target_properties(MPIPCL PROPERTIES C_STANDARD 99)
+set_target_properties(MPIPCL PROPERTIES C_STANDARD 11)
 
 # set compile options for project
 
