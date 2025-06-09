@@ -38,7 +38,6 @@ foreach(exec_target ${mpipcl_test_execs})
 	if(CMAKE_BUILD_TYPE MATCHES "DEBUG")
 		target_compile_options(${exec_target} PRIVATE -Wall -Wextra -Wpedantic)
 	endif()
-	#message (STATUS "RPATH = ${CMAKE_INSTALL_RPATH}")
 	target_include_directories(${exec_target} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 	target_link_libraries(${exec_target} PUBLIC MPI::MPI_C)
     	target_link_libraries(${exec_target} PUBLIC MPIPCL)
@@ -62,3 +61,4 @@ foreach(exec_target ${mpipcl_test_cxx_execs})
 	endif()
 
 endforeach()
+
