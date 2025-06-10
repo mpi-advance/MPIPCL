@@ -25,6 +25,7 @@ make
 ```
 A loaded MPI package is required, along with CMake version 3.17 or higher. CMake should detect the MPI and pick the right compiler, but always double check the output to make sure.
 
+By default cmake creates a shared library in the build folder, to instead create a static library run  option '-DBUILD_DYNAMIC_LIBS=OFF'
 
 ## Examples
 There are six examples provided by this library (found in the `examples/Basic` folder) Each example has the specific execution instructions at the top, but most follow this pattern:
