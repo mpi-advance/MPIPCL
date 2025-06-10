@@ -125,7 +125,7 @@ void internal_setup(MPIPCL_REQUEST *request)
   assert(MPI_SUCCESS == ret_val);
 
   // create partition status arrays.
-  request->internal_status = (int *)malloc(sizeof(int) * request->parts); // true if ready to send or received
+  request->internal_status = (atomic_int *)malloc(sizeof(atomic_int) * request->parts); // true if ready to send or received
   request->complete = (bool *)malloc(sizeof(bool) * request->parts);      // internal request has been started
 
   // for each allocated partition create a request based on side.
@@ -150,7 +150,8 @@ void internal_setup(MPIPCL_REQUEST *request)
                   (void *)&request->request[i]);
     }
 
-    request->internal_status[i] = 0;
+    // Since they're atomic, might as well do the atomic init call
+    atomic_init(&request->internal_status[i], 0);
     request->complete[i] = 0;
   }
 }
