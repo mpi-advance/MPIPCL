@@ -12,16 +12,17 @@
  *                              controlled by "HARD_NUMBER" below
  *    NOTE: bufsize % npartitions == 0
  */
-#include <stdio.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <mpi.h>
 #include <omp.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "mpipcl.h"
 
 const char HARD_NUMBER = '2';
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     int rank, size, nparts, mode, bufsize, count, tag = 0xbad;
     int i, j, provided;
@@ -42,27 +43,27 @@ int main(int argc, char *argv[])
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
-    nparts = atoi(argv[1]);
+    nparts  = atoi(argv[1]);
     bufsize = atoi(argv[2]);
-    count = bufsize / nparts;
-    mode = atoi(argv[3]);
-    if(mode < 0 || mode > 3)
+    count   = bufsize / nparts;
+    mode    = atoi(argv[3]);
+    if (mode < 0 || mode > 3)
     {
         printf("Invalid mode for this test.\n");
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
     MPI_Info the_info;
-    if(mode == 0)
+    if (mode == 0)
     {
         the_info = MPI_INFO_NULL;
     }
-    else if(mode == 1)
+    else if (mode == 1)
     {
         MPI_Info_create(&the_info);
         MPI_Info_set(the_info, "PMODE", "SENDER");
     }
-    else if(mode == 2)
+    else if (mode == 2)
     {
         MPI_Info_create(&the_info);
         MPI_Info_set(the_info, "PMODE", "RECEIVER");
@@ -84,7 +85,8 @@ int main(int argc, char *argv[])
 
     if (rank == 0)
     { /* sender */
-        MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD, the_info, &req);
+        MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD,
+                        the_info, &req);
         MPIX_Start(&req);
 
 #pragma omp parallel for private(j) shared(buf, req) num_threads(nparts)
@@ -102,7 +104,8 @@ int main(int argc, char *argv[])
     }
     else
     { /* receiver */
-        MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, the_info, &req);
+        MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD,
+                        the_info, &req);
         MPIX_Start(&req);
         MPIX_Wait(&req, &status);
 
@@ -110,11 +113,11 @@ int main(int argc, char *argv[])
         for (i = 0, sum = 0.0; i < bufsize; i++)
             sum += buf[i];
 
-        printf("#partitions = %d bufsize = %d count = %d sum = %f\n",
-               nparts, bufsize, count, sum);
+        printf("#partitions = %d bufsize = %d count = %d sum = %f\n", nparts,
+               bufsize, count, sum);
     }
 
-    if(mode !=0)
+    if (mode != 0)
         MPI_Info_free(&the_info);
     MPIX_Request_free(&req);
     free(buf);
