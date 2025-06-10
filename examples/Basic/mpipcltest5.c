@@ -128,7 +128,8 @@ int main(int argc, char* argv[])
         assert(rc == MPI_SUCCESS);
 
         printf("Testsome complete count: %d \n", complete);
-        for (int i = 0; i < complete; i++) printf("%d ", indices[i]);
+        for (int i = 0; i < complete; i++)
+            printf("%d ", indices[i]);
         printf("\n");
 
         /* start final request */
@@ -142,7 +143,8 @@ int main(int argc, char* argv[])
 
         /* compute the sum of the values received */
         double sum = 0.0;
-        for (int i = 0; i < bufsize; i++) sum += buf[i];
+        for (int i = 0; i < bufsize; i++)
+            sum += buf[i];
 
         for (int j = 0; j < NUMREQ; j++)
         {

@@ -56,7 +56,8 @@ static inline void exchange(int rank, double* buf, int bufsize, int nparts,
 
         double sum = 0.0;
         /* compute the sum of the values received */
-        for (i = 0, sum = 0.0; i < bufsize; i++) sum += buf[i];
+        for (i = 0, sum = 0.0; i < bufsize; i++)
+            sum += buf[i];
 
         MPIX_Wait(&req, &status);
         printf("#partitions = %d bufsize = %d count = %d sum = %f\n", nparts,

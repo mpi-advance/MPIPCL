@@ -19,3 +19,4 @@ NamespaceIndentation: All
 AlignConsecutiveAssignments: true
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false

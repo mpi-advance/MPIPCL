@@ -110,7 +110,8 @@ int main(int argc, char* argv[])
         MPIX_Wait(&req, &status);
 
         /* compute the sum of the values received */
-        for (i = 0, sum = 0.0; i < bufsize; i++) sum += buf[i];
+        for (i = 0, sum = 0.0; i < bufsize; i++)
+            sum += buf[i];
 
         printf("#partitions = %d bufsize = %d count = %d sum = %f\n", nparts,
                bufsize, count, sum);

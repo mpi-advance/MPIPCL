@@ -62,7 +62,8 @@ int main(int argc, char* argv[])
                nparts, bufsize, count, size);
 
         /* initialize buffer */
-        for (i = 0; i < bufsize; i++) buf[i] = i + 1.0;
+        for (i = 0; i < bufsize; i++)
+            buf[i] = i + 1.0;
 
         rc = MPIX_Startall(NNEIGHBORS, req);
         assert(rc == MPI_SUCCESS);
@@ -94,7 +95,8 @@ int main(int argc, char* argv[])
         assert(rc == MPI_SUCCESS);
 
         /* compute the sum of the values received */
-        for (i = 0, sum = 0.0; i < bufsize; i++) sum += buf[i];
+        for (i = 0, sum = 0.0; i < bufsize; i++)
+            sum += buf[i];
 
         rc = MPIX_Request_free(&req[0]);
         assert(rc == MPI_SUCCESS);
