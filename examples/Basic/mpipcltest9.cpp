@@ -1,16 +1,17 @@
 /* C++ version of Test 8 to make sure compiling
-* and linking works correctly.
-* 
-* To run:
-*    mpirun -np 2 ./<test>
-*/
+ * and linking works correctly.
+ *
+ * To run:
+ *    mpirun -np 2 ./<test>
+ */
 
 #include <string>
 
 #include "mpi.h"
 #include "mpipcl.h"
 
-static inline void exchange(int rank, double* buf, int bufsize, int nparts, MPI_Info the_info)
+static inline void exchange(int rank, double* buf, int bufsize, int nparts,
+                            MPI_Info the_info)
 {
     int i, j;
     int tag = 0xbad;
@@ -20,7 +21,8 @@ static inline void exchange(int rank, double* buf, int bufsize, int nparts, MPI_
     int count = bufsize / nparts;
     if (0 == rank)
     { /* sender */
-        MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD, the_info, &req);
+        MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD,
+                        the_info, &req);
         MPIX_Start(&req);
 
 #pragma omp parallel for private(j) shared(buf, req) num_threads(nparts)
@@ -38,32 +40,32 @@ static inline void exchange(int rank, double* buf, int bufsize, int nparts, MPI_
     }
     else
     { /* receiver */
-        MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, the_info, &req);
+        MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD,
+                        the_info, &req);
         MPIX_Start(&req);
-    
-        for(i = 0; i < nparts; i++)
+
+        for (i = 0; i < nparts; i++)
         {
             int arrived = 0;
-            while(0 == arrived)
+            while (0 == arrived)
             {
                 MPIX_Parrived(&req, i, &arrived);
             }
             printf("Done with partition %d\n", i);
         }
-    
+
         double sum = 0.0;
         /* compute the sum of the values received */
-        for (i = 0, sum = 0.0; i < bufsize; i++)
-            sum += buf[i];
-        
+        for (i = 0, sum = 0.0; i < bufsize; i++) sum += buf[i];
+
         MPIX_Wait(&req, &status);
-        printf("#partitions = %d bufsize = %d count = %d sum = %f\n",
-               nparts, bufsize, count, sum);
+        printf("#partitions = %d bufsize = %d count = %d sum = %f\n", nparts,
+               bufsize, count, sum);
     }
     MPIX_Request_free(&req);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     int provided;
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
@@ -79,11 +81,11 @@ int main(int argc, char *argv[])
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
-    int string_size = 20;
+    int string_size         = 20;
     std::string HARD_NUMBER = "4";
-    int nparts = atoi(HARD_NUMBER.c_str());
+    int nparts              = atoi(HARD_NUMBER.c_str());
 
-    int bufsize = nparts*(nparts/2)*(nparts*2);
+    int bufsize = nparts * (nparts / 2) * (nparts * 2);
     double* buf = new double[bufsize];
 
     MPI_Info the_info;
@@ -91,21 +93,21 @@ int main(int argc, char *argv[])
     MPI_Info_set(the_info, "PMODE", "HARD");
     MPI_Info_set(the_info, "SET", HARD_NUMBER.c_str());
 
-    if(1 == rank)
+    if (1 == rank)
     {
         printf("Testing partitions equal to \"HARD\" preset: %d\n", nparts);
     }
     exchange(rank, buf, bufsize, nparts, the_info);
 
-    nparts = nparts*2;
-    if(1 == rank)
+    nparts = nparts * 2;
+    if (1 == rank)
     {
         printf("Testing partitions equal to 2x \"HARD\" preset: %d\n", nparts);
     }
     exchange(rank, buf, bufsize, nparts, the_info);
 
-    nparts = nparts/4;
-    if(1 == rank)
+    nparts = nparts / 4;
+    if (1 == rank)
     {
         printf("Testing partitions equal to 1/2 \"HARD\" preset: %d\n", nparts);
     }
