@@ -14,7 +14,6 @@ if(UNIQUE_NAMES AND BUILD_EXAMPLES)
 	message( FATAL_ERROR "No examples currently exist using the MPIP version of the API")
 endif()
 
-
 ##### Create main project target: MPIPCL #####
 add_library(MPIPCL "")
 
@@ -53,8 +52,6 @@ if(UNIQUE_NAMES)
 	# PUBLIC target for both this library and anyone who uses it
 	target_compile_definitions (MPIPCL PUBLIC MPIPCL_UNIQUE_NAMES=1 )
 endif()
-
-
 
 # Link MPI to project
 find_package(MPI REQUIRED)

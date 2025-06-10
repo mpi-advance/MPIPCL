@@ -61,4 +61,3 @@ foreach(exec_target ${mpipcl_test_cxx_execs})
 	endif()
 
 endforeach()
-
