@@ -43,8 +43,7 @@ foreach(exec_target ${mpipcl_test_execs})
 	target_link_libraries(${exec_target} PUBLIC Threads::Threads)
 	if(EXAMPLES_TO_BIN)
 		install(TARGETS ${exec_target})
-	endif()
-	
+	endif()	
 endforeach()
 
 foreach(exec_target ${mpipcl_test_cxx_execs})
@@ -58,5 +57,4 @@ foreach(exec_target ${mpipcl_test_cxx_execs})
 	if(EXAMPLES_TO_BIN)
 		install(TARGETS ${exec_target})
 	endif()
-
 endforeach()
