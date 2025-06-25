@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
     int rank, size, nparts, bufsize, count, rc = 0;
     int provided;
     double* buf;
-    MPIX_Request req[NUMREQ];
+    MPIA_REQUEST req[NUMREQ];
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
     assert(provided == MPI_THREAD_SERIALIZED);
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
             assert(rc == MPI_SUCCESS);
 
             /* clean up */
-            rc = MPIX_Request_free(&req[j]);
+            rc = MPIA_Request_free(&req[j]);
             assert(rc == MPI_SUCCESS);
         }
     }
@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
 
         for (int j = 0; j < NUMREQ; j++)
         {
-            rc = MPIX_Request_free(&req[j]);
+            rc = MPIA_Request_free(&req[j]);
             assert(rc == MPI_SUCCESS);
         }
 

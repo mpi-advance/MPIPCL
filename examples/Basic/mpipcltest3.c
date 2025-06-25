@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
     int rank, size, nparts, bufsize, count, tag = 0xbad, rc = 0;
     int i, provided;
     double *buf, sum;
-    MPIX_Request req[NNEIGHBORS];
+    MPIA_REQUEST req[NNEIGHBORS];
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
     assert(provided == MPI_THREAD_SERIALIZED);
@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
         assert(rc == MPI_SUCCESS);
         for (i = 0; i < NNEIGHBORS; i++)
         {
-            rc = MPIX_Request_free(&req[i]);
+            rc = MPIA_Request_free(&req[i]);
             assert(rc == MPI_SUCCESS);
         }
     }
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
         for (i = 0, sum = 0.0; i < bufsize; i++)
             sum += buf[i];
 
-        rc = MPIX_Request_free(&req[0]);
+        rc = MPIA_Request_free(&req[0]);
         assert(rc == MPI_SUCCESS);
         printf("[%d]: #partitions = %d bufsize = %d count = %d sum = %f (%f)\n",
                rank, nparts, bufsize, count, sum,

@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
     int rank, size, nparts, bufsize, count, tag = 0xbad;
     int i, j, provided;
     double *buf, sum;
-    MPIX_Request req;
+    MPIA_REQUEST req;
     MPI_Status status;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
     { /* sender */
         MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD,
                         MPI_INFO_NULL, &req);
-        MPIX_Start(&req);
-
+		MPIX_Start(&req);
+		
 #pragma omp parallel for private(j) shared(buf, req) num_threads(nparts)
         for (i = 0; i < nparts; i++)
         {
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
                bufsize, count, sum);
     }
 
-    MPIX_Request_free(&req);
+    MPIA_Request_free(&req);
     free(buf);
     MPI_Finalize();
 

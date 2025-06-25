@@ -19,7 +19,7 @@ static inline void exchange(int rank, double* buf, int bufsize, int nparts,
 {
     int i, j;
     int tag = 0xbad;
-    MPIX_Request req;
+    MPIA_REQUEST req;
     MPI_Status status;
 
     int count = bufsize / nparts;
@@ -67,7 +67,7 @@ static inline void exchange(int rank, double* buf, int bufsize, int nparts,
         printf("#partitions = %d bufsize = %d count = %d sum = %f\n", nparts,
                bufsize, count, sum);
     }
-    MPIX_Request_free(&req);
+    MPIA_Request_free(&req);
 }
 
 int main(int argc, char* argv[])

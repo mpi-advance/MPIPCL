@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     int rank, size, nparts, bufsize, count, tag = 0xbad;
     int i, j, provided;
     double *buf, sum;
-    MPIX_Request req;
+    MPIA_REQUEST req;
     MPI_Status status;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
                bufsize, count, sum);
     }
 
-    MPIX_Request_free(&req);
+    MPIA_Request_free(&req);
     free(buf);
     MPI_Finalize();
 

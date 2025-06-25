@@ -32,6 +32,7 @@ extern "C" {
 #define EXPAND(namespace, name) CONCAT(namespace, name)
 #define MPIPCL(name) EXPAND(MPIPCL_NAMESPACE, name)
 
+
 // structure to hold message settings if threaded sync is necessary
 typedef struct _meta_
 {
@@ -59,6 +60,19 @@ enum Thread_Status
     RUNNING  = 0,
     FINISHED = 1
 };
+
+enum request_type
+{
+	MPIPC = 0,
+	MPIST = 1,
+	MPITA = 2
+};
+
+typedef struct _mpia_request
+{
+	enum request_type type;
+	uintptr_t request;
+}MPIA_REQUEST;
 
 typedef struct _mpipcl_request
 {
@@ -92,44 +106,45 @@ typedef struct _mpipcl_request
         threaded;  // status of sync thread "-1"-no_thread, 0-exist, 1-finished
 } MPIPCL_REQUEST;
 
+
 //----------------------------------------------------------------------------------------------
 
 int MPIPCL(_Psend_init)(void* buf, int partitions, MPI_Count count,
                         MPI_Datatype datatype, int dest, int tag, MPI_Comm comm,
-                        MPI_Info info, MPIPCL_REQUEST* request);
+                        MPI_Info info, MPIA_REQUEST* request);
 
 int MPIPCL(_Precv_init)(void* buf, int partitions, MPI_Count count,
                         MPI_Datatype datatype, int dest, int tag, MPI_Comm comm,
-                        MPI_Info info, MPIPCL_REQUEST* request);
+                        MPI_Info info, MPIA_REQUEST* request);
 
-int MPIPCL(_Pready)(int partition, MPIPCL_REQUEST* request);
+int MPIPCL(_Pready)(int partition, MPIA_REQUEST* request);
 
 int MPIPCL(_Pready_range)(int partition_low, int partition_high,
-                          MPIPCL_REQUEST* request);
+                          MPIA_REQUEST* request);
 
 int MPIPCL(_Pready_list)(int length, int array_of_partitions[],
-                         MPIPCL_REQUEST* request);
+                         MPIA_REQUEST* request);
 
-int MPIPCL(_Parrived)(MPIPCL_REQUEST* request, int partition, int* flag);
+int MPIPCL(_Parrived)(MPIA_REQUEST* request, int partition, int* flag);
 
-int MPIPCL(_Start)(MPIPCL_REQUEST* request);
-int MPIPCL(_Startall)(int count, MPIPCL_REQUEST array_of_requests[]);
+int MPIPCL(_Start)(MPIA_REQUEST* request);
+int MPIPCL(_Startall)(int count, MPIA_REQUEST array_of_requests[]);
 
-int MPIPCL(_Wait)(MPIPCL_REQUEST* request, MPI_Status* status);
-int MPIPCL(_Waitall)(int count, MPIPCL_REQUEST array_of_requests[],
+int MPIPCL(_Wait)(MPIA_REQUEST* request, MPI_Status* status);
+int MPIPCL(_Waitall)(int count, MPIA_REQUEST array_of_requests[],
                      MPI_Status array_of_statuses[]);
-int MPIPCL(_Waitany)(int count, MPIPCL_REQUEST array_of_requests[], int* index,
+int MPIPCL(_Waitany)(int count, MPIA_REQUEST array_of_requests[], int* index,
                      MPI_Status* status);
-int MPIPCL(_Waitsome)(int incount, MPIPCL_REQUEST array_of_requests[],
+int MPIPCL(_Waitsome)(int incount, MPIA_REQUEST array_of_requests[],
                       int* outcount, int array_of_indices[],
                       MPI_Status array_of_statuses[]);
 
-int MPIPCL(_Test)(MPIPCL_REQUEST* request, int* flag, MPI_Status* status);
-int MPIPCL(_Testall)(int count, MPIPCL_REQUEST array_of_requests[], int* flag,
+int MPIPCL(_Test)(MPIA_REQUEST* request, int* flag, MPI_Status* status);
+int MPIPCL(_Testall)(int count, MPIA_REQUEST array_of_requests[], int* flag,
                      MPI_Status array_of_statuses[]);
-int MPIPCL(_Testany)(int count, MPIPCL_REQUEST array_of_requests[], int* index,
+int MPIPCL(_Testany)(int count, MPIA_REQUEST array_of_requests[], int* index,
                      int* flag, MPI_Status* status);
-int MPIPCL(_Testsome)(int incount, MPIPCL_REQUEST array_of_requests[],
+int MPIPCL(_Testsome)(int incount, MPIA_REQUEST array_of_requests[],
                       int* outcount, int array_of_indices[],
                       MPI_Status array_of_statuses[]);
 
@@ -155,6 +170,10 @@ void general_send(int id, MPIPCL_REQUEST* request);
 
 // remap functions
 int map_recv_buffer(int id, MPIPCL_REQUEST* request);
+
+//other functions
+MPIPCL_REQUEST* unwrap_request(MPIA_REQUEST* wrapper, enum request_type expected);
+int MPIA_Request_free(MPIA_REQUEST* wrapper);
 
 // debug functions
 #if defined(WITH_DEBUG)
