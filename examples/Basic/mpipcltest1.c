@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
     { /* sender */
         MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD,
                         MPI_INFO_NULL, &req);
-		MPIX_Start(&req);
-		
+        MPIX_Start(&req);
+
 #pragma omp parallel for private(j) shared(buf, req) num_threads(nparts)
         for (i = 0; i < nparts; i++)
         {

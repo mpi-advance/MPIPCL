@@ -32,7 +32,6 @@ extern "C" {
 #define EXPAND(namespace, name) CONCAT(namespace, name)
 #define MPIPCL(name) EXPAND(MPIPCL_NAMESPACE, name)
 
-
 // structure to hold message settings if threaded sync is necessary
 typedef struct _meta_
 {
@@ -63,16 +62,16 @@ enum Thread_Status
 
 enum request_type
 {
-	MPIPC = 0,
-	MPIST = 1,
-	MPITA = 2
+    MPIPC = 0,
+    MPIST = 1,
+    MPITA = 2
 };
 
 typedef struct _mpia_request
 {
-	enum request_type type;
-	uintptr_t request;
-}MPIA_REQUEST;
+    enum request_type type;
+    uintptr_t request;
+} MPIA_REQUEST;
 
 typedef struct _mpipcl_request
 {
@@ -105,7 +104,6 @@ typedef struct _mpipcl_request
     enum Thread_Status
         threaded;  // status of sync thread "-1"-no_thread, 0-exist, 1-finished
 } MPIPCL_REQUEST;
-
 
 //----------------------------------------------------------------------------------------------
 
@@ -171,8 +169,9 @@ void general_send(int id, MPIPCL_REQUEST* request);
 // remap functions
 int map_recv_buffer(int id, MPIPCL_REQUEST* request);
 
-//other functions
-MPIPCL_REQUEST* unwrap_request(MPIA_REQUEST* wrapper, enum request_type expected);
+// other functions
+MPIPCL_REQUEST* unwrap_request(MPIA_REQUEST* wrapper,
+                               enum request_type expected);
 int MPIA_Request_free(MPIA_REQUEST* wrapper);
 
 // debug functions
