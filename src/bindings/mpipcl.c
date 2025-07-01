@@ -14,7 +14,11 @@ MPIPCL_REQUEST* unwrap_request(MPIA_REQUEST* wrapper,
         printf("Error: Request Subtype mismatch! -- %d  |  %d\n", wrapper->type,
                expected);
     }
+#ifdef __cplusplus
+	return wrapper->request;
+#else	
     return (MPIPCL_REQUEST*)(wrapper->request);
+#endif
 }
 
 // Init functions - call function in setup.c
