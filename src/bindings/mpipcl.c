@@ -4,36 +4,19 @@
 extern "C" {
 #endif
 
-/* Initial implementation of partitioned communication API */
-MPIPCL_REQUEST* unwrap_request(MPIA_REQUEST* wrapper,
-                               enum request_type expected)
-{
-    // check if type is same as expected
-    if (wrapper->type != expected)
-    {
-        printf("Error: Request Subtype mismatch! -- %d  |  %d\n", wrapper->type,
-               expected);
-    }
-#ifdef __cplusplus
-	return wrapper->request;
-#else	
-    return (MPIPCL_REQUEST*)(wrapper->request);
-#endif
-}
-
 // Init functions - call function in setup.c
 int MPIPCL(_Psend_init)(void* buf, int partitions, MPI_Count count,
                         MPI_Datatype datatype, int dest, int tag, MPI_Comm comm,
                         MPI_Info info, MPIA_REQUEST* wrapper)
 {
-    wrapper->type = MPIPC;
-    MPIPCL_REQUEST* request;
+	
+   
 #ifdef __cplusplus
-    wrapper->request = new MPIPCL_REQUEST;
-    request          = wrapper->request;
+    MPIPCL_REQUEST* request = new MPIPCL_REQUEST;
+    *wrapper = (uintptr_t)request;
 #else
-    wrapper->request = (uintptr_t)malloc(sizeof(MPIPCL_REQUEST));
-    request          = (MPIPCL_REQUEST*)wrapper->request;
+    MPIPCL_REQUEST* request = (MPIPCL_REQUEST*)malloc(sizeof(MPIPCL_REQUEST));
+    *wrapper = (uintptr_t)request;
 #endif
 
     request->side = SENDER;
@@ -47,10 +30,13 @@ int MPIPCL(_Precv_init)(void* buf, int partitions, MPI_Count count,
                         MPI_Datatype datatype, int dest, int tag, MPI_Comm comm,
                         MPI_Info info, MPIA_REQUEST* wrapper)
 {
-    wrapper->request        = (uintptr_t)malloc(sizeof(MPIPCL_REQUEST));
-    wrapper->type           = MPIPC;
-    MPIPCL_REQUEST* request = (MPIPCL_REQUEST*)wrapper->request;
-
+#ifdef __cplusplus
+    MPIPCL_REQUEST* request = new MPIPCL_REQUEST;
+    *wrapper = (uintptr_t)request;
+#else
+    MPIPCL_REQUEST* request = (MPIPCL_REQUEST*)malloc(sizeof(MPIPCL_REQUEST));
+    *wrapper = (uintptr_t)request;
+#endif
     request->side = RECEIVER;
     prep(buf, partitions, count, datatype, dest, tag, comm, request);
     sync_driver(info, request);
@@ -62,7 +48,7 @@ int MPIPCL(_Pready)(int partition, MPIA_REQUEST* wrapper)
 {
     MPIPCL_DEBUG("INSIDE PREADY\n");
     // check for calling conditions
-    MPIPCL_REQUEST* request = unwrap_request(wrapper, MPIPC);
+    MPIPCL_REQUEST* request = (MPIPCL_REQUEST*)*wrapper;
 
     assert(request->side == SENDER && request->state == ACTIVE);
 
@@ -112,7 +98,7 @@ int MPIPCL(_Pready_list)(int length, int array_of_partitions[],
 // calls functions from send.c
 int MPIPCL(_Parrived)(MPIA_REQUEST* wrapper, int partition, int* flag)
 {
-    MPIPCL_REQUEST* request = (MPIPCL_REQUEST*)unwrap_request(wrapper, MPIPC);
+    MPIPCL_REQUEST* request = (MPIPCL_REQUEST*)*wrapper;
     assert(request->side != SENDER);
 
     pthread_mutex_lock(&request->lock);
@@ -134,7 +120,7 @@ int MPIPCL(_Parrived)(MPIA_REQUEST* wrapper, int partition, int* flag)
 
 int MPIPCL(_Start)(MPIA_REQUEST* wrapper)
 {
-    MPIPCL_REQUEST* request = (MPIPCL_REQUEST*)unwrap_request(wrapper, MPIPC);
+    MPIPCL_REQUEST* request = (MPIPCL_REQUEST*)*wrapper;
     MPIPCL_DEBUG("MPIX START CALLED: %d\n", request->side);
     pthread_mutex_lock(&request->lock);
     enum Thread_Status thread_status = request->threaded;
@@ -177,7 +163,7 @@ int MPIPCL(_Startall)(int count, MPIA_REQUEST array_of_requests[])
 // changes.
 int MPIPCL(_Wait)(MPIA_REQUEST* wrapper, MPI_Status* status)
 {
-    MPIPCL_REQUEST* request = (MPIPCL_REQUEST*)unwrap_request(wrapper, MPIPC);
+    MPIPCL_REQUEST* request = (MPIPCL_REQUEST*)*wrapper;
 
     // if(request == NULL || request -> state == INACTIVE) {return MPI_SUCCESS;}
     MPIPCL_DEBUG("Inside MPIX Wait: %d \n", request->side);
@@ -273,7 +259,7 @@ int MPIPCL(_Waitsome)(int incount, MPIA_REQUEST array_of_requests[],
 int MPIPCL(_Test)(MPIA_REQUEST* wrapper, int* flag, MPI_Status* status)
 {
     *flag                   = 0;
-    MPIPCL_REQUEST* request = unwrap_request(wrapper, MPIPC);
+    MPIPCL_REQUEST* request = (MPIPCL_REQUEST*)*wrapper;
     if (request == NULL || request->state == INACTIVE)
     {
         MPIPCL_DEBUG(
@@ -366,19 +352,13 @@ int MPIPCL(_Testsome)(int incount, MPIA_REQUEST array_of_requests[],
 
 int MPIA_Request_free(MPIA_REQUEST* wrapper)
 {
-    switch (wrapper->type)
-    {
-        case MPIPC:
-            MPIPCL(_Request_free)((MPIPCL_REQUEST*)wrapper->request);
-            break;
-        default:
-            printf("ERROR FREEING MPIA REQUEST");
-    }
+    MPIPCL(_Request_free)((MPIPCL_REQUEST*)*wrapper);
 }
 
 // cleanup function
 int MPIPCL(_Request_free)(MPIPCL_REQUEST* request)
 {
+	
     // clear internal array of requests
     for (int i = 0; i < request->parts; i++)
     {

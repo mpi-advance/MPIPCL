@@ -67,11 +67,7 @@ enum request_type
     MPITA = 2
 };
 
-typedef struct _mpia_request
-{
-    enum request_type type;
-    uintptr_t request;
-} MPIA_REQUEST;
+typedef uintptr_t MPIA_REQUEST;
 
 typedef struct _mpipcl_request
 {

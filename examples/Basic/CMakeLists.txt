@@ -43,6 +43,7 @@ foreach(exec_target ${mpipcl_test_execs})
 	target_link_libraries(${exec_target} PUBLIC Threads::Threads)
 	if(EXAMPLES_TO_BIN)
 		install(TARGETS ${exec_target})
+		
 	endif()	
 endforeach()
 
@@ -58,3 +59,9 @@ foreach(exec_target ${mpipcl_test_cxx_execs})
 		install(TARGETS ${exec_target})
 	endif()
 endforeach()
+
+configure_file(
+    "./test_examples.sh"
+    "./test_examples.sh"
+    COPYONLY
+)
