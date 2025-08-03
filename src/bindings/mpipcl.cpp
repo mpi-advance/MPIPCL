@@ -23,7 +23,7 @@ int MPIA_Psend_init(void* buf, int partitions, MPI_Count count,
 
     *request = new _MPIA_Request{user_request};
 
-    return MPI_SUCCESS;
+    return MPIA_SUCCESS;
 }
 
 int MPIA_Precv_init(void* buf, int partitions, MPI_Count count,
@@ -39,7 +39,7 @@ int MPIA_Precv_init(void* buf, int partitions, MPI_Count count,
 
     *request = new _MPIA_Request{user_request};
 
-    return MPI_SUCCESS;
+    return MPIA_SUCCESS;
 }
 
 int MPIA_Pready(int partition, MPIA_Request* request)
@@ -56,7 +56,7 @@ int MPIA_Pready(int partition, MPIA_Request* request)
         (MPIPCLRequest*)((*request)->internal_request);
     mpipcl_request->pready(partition);
 
-    return MPI_SUCCESS;
+    return MPIA_SUCCESS;
 }
 
 int MPIA_Pready_range(int partition_low, int partition_high,
@@ -65,9 +65,9 @@ int MPIA_Pready_range(int partition_low, int partition_high,
     for (int i = partition_low; i <= partition_high; i++)
     {
         int ret_val = MPIA_Pready(i, request);
-        assert(MPI_SUCCESS == ret_val);
+        assert(MPIA_SUCCESS == ret_val);
     }
-    return MPI_SUCCESS;
+    return MPIA_SUCCESS;
 }
 
 int MPIA_Pready_list(int length, int array_of_partitions[],
@@ -76,9 +76,9 @@ int MPIA_Pready_list(int length, int array_of_partitions[],
     for (int i = 0; i < length; i++)
     {
         int ret_val = MPIA_Pready(array_of_partitions[i], request);
-        assert(MPI_SUCCESS == ret_val);
+        assert(MPIA_SUCCESS == ret_val);
     }
-    return MPI_SUCCESS;
+    return MPIA_SUCCESS;
 }
 
 // calls functions from send.c
@@ -97,7 +97,7 @@ int MPIA_Parrived(MPIA_Request* request, int partition, int* flag)
 
     *flag = mpipcl_request->parrived(partition);
 
-    return MPI_SUCCESS;
+    return MPIA_SUCCESS;
 }
 
 #ifdef __cplusplus

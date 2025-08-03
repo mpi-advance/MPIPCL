@@ -4,7 +4,6 @@ include(CMakeDependentOption)
 
 ##### Available options #####
 option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
-option(WITH_DEBUG "Turn debug statements on or off." OFF)
 option(BUILD_EXAMPLES "Turn on building of MPIPCL Examples." OFF)
 cmake_dependent_option(EXAMPLES_TO_BIN "Create examples in <install>/bin. requires BUILD_EXAMPLES" OFF "BUILD_EXAMPLES" OFF)
 
@@ -30,10 +29,6 @@ if(CMAKE_BUILD_TYPE MATCHES "DEBUG")
 	target_compile_options(MPIPCL PRIVATE -Wall -Wextra -Wpedantic)
 	target_compile_options(MPIPCL PRIVATE -Wno-unused-parameter)
 	target_compile_options(MPIPCL PRIVATE -ggdb)
-endif()
-
-if(CMAKE_BUILD_TYPE MATCHES "DEBUG" OR WITH_DEBUG)
-	add_definitions(-DWITH_DEBUG)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES "RELEASE")
