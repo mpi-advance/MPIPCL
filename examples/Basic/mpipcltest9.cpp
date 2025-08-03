@@ -73,6 +73,7 @@ int main(int argc, char* argv[])
     int provided;
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
     assert(provided == MPI_THREAD_SERIALIZED);
+    MPIA_Init();
 
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -84,7 +85,6 @@ int main(int argc, char* argv[])
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
-    int string_size         = 20;
     std::string HARD_NUMBER = "4";
     int nparts              = atoi(HARD_NUMBER.c_str());
 

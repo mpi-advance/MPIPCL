@@ -9,6 +9,9 @@
 
 namespace MPIAdvance
 {
+
+inline Registrar MPIPCLRegistrar([] { Debug::out("MPIPCL Initialized."); });
+
 namespace mpipcl
 {
 // structure to hold message settings if threaded sync is necessary
@@ -46,24 +49,24 @@ public:
     MPIPCLRequest(P2PSide _side, void* buf, int partitions, MPI_Count count,
                   MPI_Datatype datatype, int opp, int tag, MPI_Comm comm)
         : Request(MPIAdvance::RequestType::MPIPCL),
-          state(Activation::INACTIVE),
           side(_side),
-          local_size(count),
-          local_parts(partitions),
-          parts(1),
-          threaded(ThreadStatus::NONE),
+          state(Activation::INACTIVE),
           local_status(partitions, false),
-          comm_data({buf, opp, tag, comm, datatype})
+          local_parts(partitions),
+          local_size(count),
+          parts(1),
+          comm_data({buf, opp, tag, comm, datatype}),
+          threaded(ThreadStatus::NONE)
     {
         /*set overall request lock*/
         int ret_val = pthread_mutex_init(&lock, NULL);
         assert(0 == ret_val);
-        MPIPCL_DEBUG("%d : PREP COMPLETE\n", side);
+        Debug::out(side, ": PREP COMPLETE");
     }
     ~MPIPCLRequest()
     {
         // Join thread incase request was freed too early
-        if(sync_thread.joinable())
+        if (sync_thread.joinable())
         {
             sync_thread.join();
         }
@@ -81,7 +84,7 @@ public:
 
     void pready(int partition)
     {
-        MPIPCL_DEBUG("INSIDE PREADY\n");
+        Debug::out("INSIDE PREADY");
         // check for calling conditions
         assert(side == P2PSide::SENDER && state == Activation::ACTIVE);
 
@@ -100,7 +103,7 @@ public:
         }
         else
         {
-            MPIPCL_DEBUG("%d delayed\n", partition);
+            Debug::out(partition, "delayed");
         }
     }
 
@@ -123,7 +126,7 @@ public:
 
     void start() override
     {
-        MPIPCL_DEBUG("MPIX START CALLED: %d\n", side);
+        Debug::out("MPIX START CALLED:", side);
         pthread_mutex_lock(&lock);
         ThreadStatus thread_status = threaded;
         state                      = Activation::ACTIVE;
@@ -137,7 +140,7 @@ public:
             // if receiver start recv requests.
             if (side == P2PSide::RECEIVER)
             {
-                MPIPCL_DEBUG("USER THREAD IS STARTING RECV:%d\n", parts);
+                Debug::out("USER THREAD IS STARTING RECV:", parts);
                 int ret_val = MPI_Startall(parts, requests.data());
                 assert(MPI_SUCCESS == ret_val);
             }
@@ -145,7 +148,7 @@ public:
     }
     void wait() override
     {
-        MPIPCL_DEBUG("Inside MPIX Wait: %d \n", side);
+        Debug::out("Inside MPIX Wait:", side);
         pthread_mutex_lock(&lock);
         ThreadStatus t_status = threaded;
         pthread_mutex_unlock(&lock);
@@ -158,8 +161,8 @@ public:
         }
 
         // once setup is complete, wait on all internal partitions.
-        MPIPCL_DEBUG("Waiting on %d reqs at address %p\n", parts,
-                     (void*)requests);
+        Debug::out("Waiting on", parts, "reqs at address",
+                   (void*)requests.data());
         int ret_val = MPI_Waitall(parts, requests.data(), MPI_STATUSES_IGNORE);
         assert(MPI_SUCCESS == ret_val);
 
@@ -171,9 +174,8 @@ public:
     {
         if (state == Activation::INACTIVE)
         {
-            MPIPCL_DEBUG(
-                "Early test exit due to null or inactive request: %p\n",
-                (void*)this);
+            Debug::out("Early test exit due to null or inactive request:",
+                       (void*)this);
             return false;
         }
 
@@ -184,7 +186,7 @@ public:
         // if not synced, return false
         if (t_status == 0)
         {
-            MPIPCL_DEBUG("Early test exit due to not synched\n");
+            Debug::out("Early test exit due to not sync-ed");
             return false;
         }
 
@@ -205,7 +207,7 @@ public:
         // check for info object
         if (info == MPI_INFO_NULL)
         {
-            MPIPCL_DEBUG("NULL INFO detected\n");
+            Debug::out("NULL INFO detected");
             sync_hard(1);
         }
         else
@@ -219,7 +221,7 @@ public:
             // Change behavior based on key - update convert to ENUM?
             if (strcmp("HARD", mode) == 0)
             {
-                MPIPCL_DEBUG("HARD INFO detected\n");
+                Debug::out("HARD INFO detected");
                 MPI_Info_get(info, "SET", MPIPCL_TAG_LENGTH, option, &flag);
                 assert(flag == 1);
 
@@ -234,12 +236,12 @@ public:
                 P2PSide driver;
                 if (strcmp(mode, "SENDER") == 0)
                 {
-                    MPIPCL_DEBUG("SENDER INFO detected\n");
+                    Debug::out("SENDER INFO detected");
                     driver = SENDER;
                 }
                 else
                 {
-                    MPIPCL_DEBUG("RECEIVER INFO detected\n");
+                    Debug::out("RECEIVER INFO detected");
                     driver = RECEIVER;
                 }
 
@@ -259,12 +261,12 @@ public:
             else
             {
                 // default to bulk request
-                MPIPCL_DEBUG("DEFAULT INFO Object detected\n");
+                Debug::out("DEFAULT INFO Object detected");
                 sync_hard(1);
             }
         }
 
-        MPIPCL_DEBUG("%d: internal setup!\n", request->side);
+        Debug::out(side, ": internal setup!");
         // finish setup after sync function finishes.
         internal_setup();
     }
@@ -313,7 +315,7 @@ private:
         parts = syncdata[0];
         size  = syncdata[1];
 
-        MPIPCL_DEBUG("%d : sync data received %d %d \n", side, parts, size);
+        Debug::out(side, ": sync data received", parts, size);
     }
     void internal_setup()
     {
@@ -340,9 +342,9 @@ private:
                                         mes.type, mes.partner, mes.tag + i,
                                         mes.comm, &requests[i]);
                 assert(MPI_SUCCESS == ret_val);
-                MPIPCL_DEBUG(
-                    "Send_init called - buffer: %p - req pointer: %p\n",
-                    (void*)((char*)mes.buff + offset), (void*)&requests[i]);
+                Debug::out("Send_init called - buffer:",
+                           (void*)((char*)mes.buff + offset),
+                           "- req pointer:", (void*)&requests[i]);
             }
             else
             {
@@ -350,10 +352,9 @@ private:
                                         mes.type, mes.partner, mes.tag + i,
                                         mes.comm, &requests[i]);
                 assert(MPI_SUCCESS == ret_val);
-                MPIPCL_DEBUG(
-                    "Recv_init called - buffer: %p - req pointers: %p\n",
-                    (void*)(void*)((char*)mes.buff + offset),
-                    (void*)&requests[i]);
+                Debug::out("Recv_init called - buffer:",
+                           (void*)((char*)mes.buff + offset),
+                           "- req pointer:", (void*)&requests[i]);
             }
 
             // Since they're atomic, might as well do the atomic init call
@@ -380,13 +381,13 @@ private:
         // if request is active(MPI_Start), run catchup tasks.
         if (side == P2PSide::RECEIVER && state == Activation::ACTIVE)
         {
-            MPIPCL_DEBUG("%d THREAD IS STARTING RECVS:%d \n", side, size);
+            Debug::out(side, "THREAD IS STARTING RECVS:", size);
             int ret_val = MPI_Startall(parts, requests.data());
             assert(MPI_SUCCESS == ret_val);
         }
         else if (side == P2PSide::SENDER && state == Activation::ACTIVE)
         {
-            MPIPCL_DEBUG("%d THREAD IS STARTING SENDS:%d \n", side, size)
+            Debug::out(side, "THREAD IS STARTING SENDS:", size);
             send_ready();
         }
         // once caught up, signal thread completion and return.
@@ -411,8 +412,8 @@ private:
         int start_part = 0;
         int end_part   = 0;
         int threshold  = 0;
-        MPIPCL_DEBUG("User Partitions %d - Network Partitions %d\n",
-                     local_parts, parts);
+        Debug::out("User Partitions", local_parts, "- Network Partitions",
+                   parts);
         if (local_parts <= parts)
         {
             map_local_to_network_partitions(id, &start_part, &end_part);
@@ -425,8 +426,8 @@ private:
             end_part   = start_part + 1;
         }
 
-        MPIPCL_DEBUG("User Partition %d - Start %d End %d \n", id, start_part,
-                     end_part);
+        Debug::out("User Partition", id, "- Start", start_part, "End",
+                   end_part);
 
         // for each internal request affected
         for (int i = start_part; i < end_part; i++)
@@ -435,16 +436,15 @@ private:
             int prior_value = std::atomic_fetch_add_explicit(
                 &internal_status[i], 1, std::memory_order_relaxed);
 
-            MPIPCL_DEBUG("Network Partition %d - Count: %d, Threshold: %d\n", i,
-                         prior_value + 1, threshold);
+            Debug::out("Network Partition", i, "- Count:", prior_value + 1,
+                       "Threshold:", threshold);
 
             // if the number of local partitions needed for one network
             // partition are ready
             if (prior_value + 1 == threshold)
             {
                 // start associated request
-                MPIPCL_DEBUG("Starting request %d %p \n", i,
-                             (void*)(&requests[i]));
+                Debug::out("Starting request", i, (void*)(&requests[i]));
                 int ret_val = MPI_Start(&requests[i]);
                 assert(MPI_SUCCESS == ret_val);
             }
@@ -462,8 +462,8 @@ private:
         int temp_end = ceil(network_partitions / user_partitions) *
                        (user_partition_id + 1);
 
-        MPIPCL_DEBUG("Partition %d - Start %d End %d \n", user_partition_id,
-                     temp_start, temp_end);
+        Debug::out("Partition", user_partition_id, "- Start", temp_start, "End",
+                   temp_end);
         assert(temp_start >= 0 && temp_end > temp_start &&
                temp_end <= network_partitions);
 
@@ -496,9 +496,9 @@ private:
 
         // check status of dependent requests
         int flag = 0;
-        MPIPCL_DEBUG("User Partitions %d - Network Partitions %d\n",
-                     local_parts, parts);
-        MPIPCL_DEBUG("Checking Requests: [%d: %d)\n", start, end);
+        Debug::out("User Partitions", local_parts, "- Network Partitions",
+                   parts);
+        Debug::out("Checking Requests: [", start, ":", end, ")");
         int ret_val = MPI_Testall(end - start, &requests[start], &flag,
                                   MPI_STATUSES_IGNORE);
         assert(MPI_SUCCESS == ret_val);
@@ -509,14 +509,18 @@ private:
         return flag;
     }
 
-    enum Activation state;
-    enum P2PSide    side;
-    std::vector<bool> local_status;  // status array - true if external partition is
-                         // ready
+    /* Which direction will the data go*/
+    enum P2PSide side;
+
+    /* Status related variables*/
+    enum Activation   state;
+    std::vector<bool> local_status;  // status array - true if external
+                                     // partition is ready
     std::vector<std::atomic<int>> internal_status;
     std::vector<bool> complete;  // status array - true if internal request has
                                  // been started.
 
+    /* Partition Mapping Variables */
     int local_parts;  // number of partitions visible externally
     int local_size;   // number of items in each partitions
 
