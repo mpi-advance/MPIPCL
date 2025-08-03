@@ -10,20 +10,22 @@
 #include "mpi.h"
 #include "mpipcl.h"
 
+#include <cassert>
+
 static inline void exchange(int rank, double* buf, int bufsize, int nparts,
                             MPI_Info the_info)
 {
     int i, j;
     int tag = 0xbad;
-    MPIX_Request req;
+    MPIA_Request req;
     MPI_Status status;
 
     int count = bufsize / nparts;
     if (0 == rank)
     { /* sender */
-        MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD,
+        MPIA_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD,
                         the_info, &req);
-        MPIX_Start(&req);
+        MPIA_Start(&req);
 
 #pragma omp parallel for private(j) shared(buf, req) num_threads(nparts)
         for (i = 0; i < nparts; i++)
@@ -33,23 +35,23 @@ static inline void exchange(int rank, double* buf, int bufsize, int nparts,
                 buf[j + i * count] = j + i * count + 1.0;
 
             /* indicate buffer is ready */
-            MPIX_Pready(i, &req);
+            MPIA_Pready(i, &req);
         }
 
-        MPIX_Wait(&req, &status);
+        MPIA_Wait(&req, &status);
     }
     else
     { /* receiver */
-        MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD,
+        MPIA_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD,
                         the_info, &req);
-        MPIX_Start(&req);
+        MPIA_Start(&req);
 
         for (i = 0; i < nparts; i++)
         {
             int arrived = 0;
             while (0 == arrived)
             {
-                MPIX_Parrived(&req, i, &arrived);
+                MPIA_Parrived(&req, i, &arrived);
             }
             printf("Done with partition %d\n", i);
         }
@@ -59,11 +61,11 @@ static inline void exchange(int rank, double* buf, int bufsize, int nparts,
         for (i = 0, sum = 0.0; i < bufsize; i++)
             sum += buf[i];
 
-        MPIX_Wait(&req, &status);
+        MPIA_Wait(&req, &status);
         printf("#partitions = %d bufsize = %d count = %d sum = %f\n", nparts,
                bufsize, count, sum);
     }
-    MPIX_Request_free(&req);
+    MPIA_Request_free(&req);
 }
 
 int main(int argc, char* argv[])

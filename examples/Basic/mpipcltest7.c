@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
     int rank, size, nparts, bufsize, count, tag = 0xbad;
     int i, j, provided;
     double *buf, sum;
-    MPIX_Request req;
+    MPIA_Request req;
     MPI_Status status;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
@@ -58,9 +58,9 @@ int main(int argc, char* argv[])
 
     if (rank == 0)
     { /* sender */
-        MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD,
+        MPIA_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD,
                         MPI_INFO_NULL, &req);
-        MPIX_Start(&req);
+        MPIA_Start(&req);
 
         for (i = 0; i < nparts; i++)
         {
@@ -69,30 +69,30 @@ int main(int argc, char* argv[])
                 buf[j + i * count] = j + i * count + 1.0;
 
             /* indicate buffer is ready */
-            MPIX_Pready(i, &req);
+            MPIA_Pready(i, &req);
         }
 
-        MPIX_Wait(&req, &status);
+        MPIA_Wait(&req, &status);
     }
     else
     { /* receiver */
         nparts *= 2;
         count = count / 2;
-        MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD,
+        MPIA_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD,
                         MPI_INFO_NULL, &req);
-        MPIX_Start(&req);
+        MPIA_Start(&req);
 
         for (i = 0; i < nparts; i++)
         {
             int done = 0;
             while (!done)
             {
-                MPIX_Parrived(&req, i, &done);
+                MPIA_Parrived(&req, i, &done);
             }
             printf("Done with partition %d\n", i);
         }
 
-        MPIX_Wait(&req, &status);
+        MPIA_Wait(&req, &status);
 
         /* compute the sum of the values received */
         for (i = 0, sum = 0.0; i < bufsize; i++)
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
                bufsize, count, sum);
     }
 
-    MPIX_Request_free(&req);
+    MPIA_Request_free(&req);
     free(buf);
     MPI_Finalize();
 

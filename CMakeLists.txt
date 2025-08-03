@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.17 FATAL_ERROR)
-project(MPIPCL VERSION 1.4.0 LANGUAGES C)
+project(MPIPCL VERSION 1.4.0 LANGUAGES C CXX)
 include(CMakeDependentOption)
 
 ##### Available options #####
@@ -7,12 +7,6 @@ option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
 option(WITH_DEBUG "Turn debug statements on or off." OFF)
 option(BUILD_EXAMPLES "Turn on building of MPIPCL Examples." OFF)
 cmake_dependent_option(EXAMPLES_TO_BIN "Create examples in <install>/bin. requires BUILD_EXAMPLES" OFF "BUILD_EXAMPLES" OFF)
-option(UNIQUE_NAMES "Changes the types and names of functions to MPIP instead of MPIX." OFF)
-
-##### check for incompatiable options
-if(UNIQUE_NAMES AND BUILD_EXAMPLES)
-	message( FATAL_ERROR "No examples currently exist using the MPIP version of the API")
-endif()
 
 ##### Create main project target: MPIPCL #####
 add_library(MPIPCL "")
@@ -47,17 +41,12 @@ if(CMAKE_BUILD_TYPE MATCHES "RELEASE")
 	target_compile_options(MPIPCL PRIVATE -funroll-loops)
 endif()
 
-if(UNIQUE_NAMES)
-	message(STATUS "Using MPIP instead of MPIX for APIs")
-	# PUBLIC target for both this library and anyone who uses it
-	target_compile_definitions (MPIPCL PUBLIC MPIPCL_UNIQUE_NAMES=1 )
-endif()
-
 # Link MPI to project
 find_package(MPI REQUIRED)
-target_link_libraries(MPIPCL MPI::MPI_C)
 find_package(Threads REQUIRED)
-target_link_libraries(MPIPCL Threads::Threads)
+find_package(MPIAdvanceBase REQUIRED)
+
+target_link_libraries(MPIPCL PUBLIC MPI::MPI_CXX Threads::Threads MPIAdvance::Base)
 
 ##### traverse subdirectories #####
 add_subdirectory(src)
@@ -68,12 +57,7 @@ endif()
 
 ##### install mpipcl #####
 install(TARGETS MPIPCL
-	EXPORT MPIPCLTargets
-	LIBRARY DESTINATION lib
-	ARCHIVE DESTINATION lib
-	PUBLIC_HEADER DESTINATION include
-)
-
+	EXPORT MPIPCLTargets)
 
 ##### Code for CMake Packaging
 include(CMakePackageConfigHelpers)
@@ -99,6 +83,6 @@ install(FILES
 
 # Install everything
 install(EXPORT MPIPCLTargets
-	NAMESPACE MPIPCL::
+	NAMESPACE MPIAdvance::
 	DESTINATION share/mpipcl
 )

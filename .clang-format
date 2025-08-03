@@ -1,4 +1,17 @@
-AccessModifierOffset: -2
+---
+BasedOnStyle: Google
+IndentWidth: 4
+DerivePointerAlignment: false
+PointerAlignment: Left
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterControlStatement: true
+  AfterFunction: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeElse: true
+---
+Language: Cpp
 BasedOnStyle: Google
 IndentWidth: 4
 DerivePointerAlignment: false
@@ -15,8 +28,14 @@ BraceWrapping:
   BeforeCatch: true
   BeforeElse: true
   SplitEmptyRecord: false
-NamespaceIndentation: All
+
+AccessModifierOffset: -4
 AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true 
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: Never
-AllowShortLoopsOnASingleLine: false
+
+IndentAccessModifiers: false
+NamespaceIndentation: None
+
+
