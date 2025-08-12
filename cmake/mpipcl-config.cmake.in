@@ -2,5 +2,10 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/MPIPCLTargets.cmake)
 
+get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+if(NOT "C" IN_LIST languages)
+    message(FATAL_ERROR "MPIPCL needs C to be enabled in the top-level CMake project!")
+endif()
+
 find_package(Threads REQUIRED)
 find_package(MPI REQUIRED)
