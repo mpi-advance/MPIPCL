@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
     int rank, size, nparts, bufsize, count, tag = 0xbad;
     int i, j, provided;
     double *buf, sum;
-    MPIX_Request req;
+    MPIP_Request req;
     MPI_Status status;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
@@ -50,9 +50,9 @@ int main(int argc, char* argv[])
 
     if (rank == 0)
     { /* sender */
-        MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD,
+        MPIP_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD,
                         MPI_INFO_NULL, &req);
-        MPIX_Start(&req);
+        MPIP_Start(&req);
 
 #pragma omp parallel for private(j) shared(buf, req) num_threads(nparts)
         for (i = 0; i < nparts; i++)
@@ -62,15 +62,15 @@ int main(int argc, char* argv[])
                 buf[j + i * count] = j + i * count + 1.0;
 
             /* indicate buffer is ready */
-            MPIX_Pready(i, &req);
+            MPIP_Pready(i, &req);
         }
-        MPIX_Wait(&req, &status);
+        MPIP_Wait(&req, &status);
     }
     else
     { /* receiver */
-        MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD,
+        MPIP_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD,
                         MPI_INFO_NULL, &req);
-        MPIX_Start(&req);
+        MPIP_Start(&req);
 
 #pragma omp parallel for shared(buf, req, sum) num_threads(nparts)
         for (i = 0; i < nparts; i++)
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
             while (!flag)
             {
                 /* check if partition has been received */
-                MPIX_Parrived(&req, i, &flag);
+                MPIP_Parrived(&req, i, &flag);
 
                 if (flag)
                 {
@@ -95,13 +95,13 @@ int main(int argc, char* argv[])
             }
         }
 
-        MPIX_Wait(&req, MPI_STATUS_IGNORE);
+        MPIP_Wait(&req, MPI_STATUS_IGNORE);
         printf("#partitions = %d bufsize = %d count = %d sum = %f (%f)\n",
                nparts, bufsize, count, sum,
                ((double)bufsize * (bufsize + 1)) / 2.0);
     }
 
-    MPIX_Request_free(&req);
+    MPIP_Request_free(&req);
     free(buf);
     MPI_Finalize();
 

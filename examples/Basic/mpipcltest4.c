@@ -1,5 +1,5 @@
 /* Sample program to test the partitioned communication API.
- * This program tests MPIX_Startall, MPIX_Pready, and MPIX_Waitall functions.
+ * This program tests MPIP_Startall, MPIP_Pready, and MPIP_Waitall functions.
  * This version uses threads on both send-side and receive-side.
  *
  * To compile:
@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
     int rank, size, nparts, bufsize, count, tag = 0xbad, rc = 0;
     int i, j, provided;
     double *buf, sum;
-    MPIX_Request req[NNEIGHBORS];
+    MPIP_Request req[NNEIGHBORS];
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
     assert(provided == MPI_THREAD_SERIALIZED);
@@ -53,12 +53,12 @@ int main(int argc, char* argv[])
     { /* sender */
         for (i = 1; i <= NNEIGHBORS; i++)
         {
-            rc = MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, i, tag,
+            rc = MPIP_Psend_init(buf, nparts, count, MPI_DOUBLE, i, tag,
                                  MPI_COMM_WORLD, MPI_INFO_NULL, &req[i - 1]);
             assert(rc == MPI_SUCCESS);
         }
 
-        rc = MPIX_Startall(NNEIGHBORS, req);
+        rc = MPIP_Startall(NNEIGHBORS, req);
         assert(rc == MPI_SUCCESS);
         printf("[%d]: nparts = %d bufsize = %d count = %d size = %d\n", rank,
                nparts, bufsize, count, size);
@@ -73,27 +73,27 @@ int main(int argc, char* argv[])
             /* indicate buffer is ready for all sends */
             for (j = 0; j < NNEIGHBORS; j++)
             {
-                rc = MPIX_Pready(i, &req[j]);
+                rc = MPIP_Pready(i, &req[j]);
                 assert(rc == MPI_SUCCESS);
             }
         }
 
-        rc = MPIX_Waitall(NNEIGHBORS, req, MPI_STATUSES_IGNORE);
+        rc = MPIP_Waitall(NNEIGHBORS, req, MPI_STATUSES_IGNORE);
         assert(rc == MPI_SUCCESS);
         for (i = 0; i < NNEIGHBORS; i++)
         {
-            rc = MPIX_Request_free(&req[i]);
+            rc = MPIP_Request_free(&req[i]);
             assert(rc == MPI_SUCCESS);
         }
     }
     else
     { /* receiver */
-        MPIX_Request req;
+        MPIP_Request req;
 
-        rc = MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag,
+        rc = MPIP_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag,
                              MPI_COMM_WORLD, MPI_INFO_NULL, &req);
         assert(rc == MPI_SUCCESS);
-        rc = MPIX_Start(&req);
+        rc = MPIP_Start(&req);
         assert(rc == MPI_SUCCESS);
 
 #pragma omp parallel for shared(buf, req, sum) num_threads(nparts)
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
             while (!flag)
             {
                 /* check if partition has been received */
-                rc = MPIX_Parrived(&req, i, &flag);
+                rc = MPIP_Parrived(&req, i, &flag);
                 assert(rc == MPI_SUCCESS);
 
                 if (flag)
@@ -120,18 +120,18 @@ int main(int argc, char* argv[])
                 else
                 {
                     /* do some other work */
-                    rc = MPIX_Test(&req, &testflag, MPI_STATUS_IGNORE);
+                    rc = MPIP_Test(&req, &testflag, MPI_STATUS_IGNORE);
                     assert(rc == MPI_SUCCESS);
                     /* do some other work based on testflag */
                 }
             }
         }
-        rc = MPIX_Wait(&req, MPI_STATUS_IGNORE);
+        rc = MPIP_Wait(&req, MPI_STATUS_IGNORE);
         assert(rc == MPI_SUCCESS);
         printf("[%d]: #partitions = %d bufsize = %d count = %d sum = %f (%f)\n",
                rank, nparts, bufsize, count, sum,
                ((double)bufsize * (bufsize + 1)) / 2.0);
-        rc = MPIX_Request_free(&req);
+        rc = MPIP_Request_free(&req);
         assert(rc == MPI_SUCCESS);
     }
 

@@ -19,19 +19,6 @@ extern "C" {
 
 #define MPIPCL_TAG_LENGTH 20
 
-#ifndef MPIPCL_UNIQUE_NAMES
-#define MPIPCL_REQUEST MPIX_Request
-#define MPIPCL_NAMESPACE MPIX
-#else
-#define MPIPCL_REQUEST MPIP_Request
-#define MPIPCL_NAMESPACE MPIP
-#endif
-
-// Determines name of function based on "MPIPCL_UNIQUE_NAMES"
-#define CONCAT(namespace, name) namespace##name
-#define EXPAND(namespace, name) CONCAT(namespace, name)
-#define MPIPCL(name) EXPAND(MPIPCL_NAMESPACE, name)
-
 // structure to hold message settings if threaded sync is necessary
 typedef struct _meta_
 {
@@ -42,7 +29,7 @@ typedef struct _meta_
     MPI_Datatype type;
 } meta;
 
-// enums for mpix request attributes
+// enums for MPIP request attributes
 enum P2P_Side
 {
     SENDER   = 0,
@@ -60,7 +47,7 @@ enum Thread_Status
     FINISHED = 1
 };
 
-typedef struct _mpipcl_request
+typedef struct _MPIP_Request
 {
     enum Activation state;
     enum P2P_Side side;
@@ -90,71 +77,71 @@ typedef struct _mpipcl_request
     pthread_mutex_t lock;
     enum Thread_Status
         threaded;  // status of sync thread "-1"-no_thread, 0-exist, 1-finished
-} MPIPCL_REQUEST;
+} MPIP_Request;
 
 //----------------------------------------------------------------------------------------------
 
-int MPIPCL(_Psend_init)(void* buf, int partitions, MPI_Count count,
+int MPIP_Psend_init(void* buf, int partitions, MPI_Count count,
                         MPI_Datatype datatype, int dest, int tag, MPI_Comm comm,
-                        MPI_Info info, MPIPCL_REQUEST* request);
+                        MPI_Info info, MPIP_Request* request);
 
-int MPIPCL(_Precv_init)(void* buf, int partitions, MPI_Count count,
+int MPIP_Precv_init(void* buf, int partitions, MPI_Count count,
                         MPI_Datatype datatype, int dest, int tag, MPI_Comm comm,
-                        MPI_Info info, MPIPCL_REQUEST* request);
+                        MPI_Info info, MPIP_Request* request);
 
-int MPIPCL(_Pready)(int partition, MPIPCL_REQUEST* request);
+int MPIP_Pready(int partition, MPIP_Request* request);
 
-int MPIPCL(_Pready_range)(int partition_low, int partition_high,
-                          MPIPCL_REQUEST* request);
+int MPIP_Pready_range(int partition_low, int partition_high,
+                          MPIP_Request* request);
 
-int MPIPCL(_Pready_list)(int length, int array_of_partitions[],
-                         MPIPCL_REQUEST* request);
+int MPIP_Pready_list(int length, int array_of_partitions[],
+                         MPIP_Request* request);
 
-int MPIPCL(_Parrived)(MPIPCL_REQUEST* request, int partition, int* flag);
+int MPIP_Parrived(MPIP_Request* request, int partition, int* flag);
 
-int MPIPCL(_Start)(MPIPCL_REQUEST* request);
-int MPIPCL(_Startall)(int count, MPIPCL_REQUEST array_of_requests[]);
+int MPIP_Start(MPIP_Request* request);
+int MPIP_Startall(int count, MPIP_Request array_of_requests[]);
 
-int MPIPCL(_Wait)(MPIPCL_REQUEST* request, MPI_Status* status);
-int MPIPCL(_Waitall)(int count, MPIPCL_REQUEST array_of_requests[],
+int MPIP_Wait(MPIP_Request* request, MPI_Status* status);
+int MPIP_Waitall(int count, MPIP_Request array_of_requests[],
                      MPI_Status array_of_statuses[]);
-int MPIPCL(_Waitany)(int count, MPIPCL_REQUEST array_of_requests[], int* index,
+int MPIP_Waitany(int count, MPIP_Request array_of_requests[], int* index,
                      MPI_Status* status);
-int MPIPCL(_Waitsome)(int incount, MPIPCL_REQUEST array_of_requests[],
+int MPIP_Waitsome(int incount, MPIP_Request array_of_requests[],
                       int* outcount, int array_of_indices[],
                       MPI_Status array_of_statuses[]);
 
-int MPIPCL(_Test)(MPIPCL_REQUEST* request, int* flag, MPI_Status* status);
-int MPIPCL(_Testall)(int count, MPIPCL_REQUEST array_of_requests[], int* flag,
+int MPIP_Test(MPIP_Request* request, int* flag, MPI_Status* status);
+int MPIP_Testall(int count, MPIP_Request array_of_requests[], int* flag,
                      MPI_Status array_of_statuses[]);
-int MPIPCL(_Testany)(int count, MPIPCL_REQUEST array_of_requests[], int* index,
+int MPIP_Testany(int count, MPIP_Request array_of_requests[], int* index,
                      int* flag, MPI_Status* status);
-int MPIPCL(_Testsome)(int incount, MPIPCL_REQUEST array_of_requests[],
+int MPIP_Testsome(int incount, MPIP_Request array_of_requests[],
                       int* outcount, int array_of_indices[],
                       MPI_Status array_of_statuses[]);
 
-int MPIPCL(_Request_free)(MPIPCL_REQUEST* request);
+int MPIP_Request_free(MPIP_Request* request);
 
 // functions current defined outside of mpipcl
 // setup.c
 void prep(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype,
-          int opp, int tag, MPI_Comm comm, MPIPCL_REQUEST* request);
-int sync_driver(MPI_Info info, MPIPCL_REQUEST* request);
-void internal_setup(MPIPCL_REQUEST* request);
-void reset_status(MPIPCL_REQUEST* request);
+          int opp, int tag, MPI_Comm comm, MPIP_Request* request);
+int sync_driver(MPI_Info info, MPIP_Request* request);
+void internal_setup(MPIP_Request* request);
+void reset_status(MPIP_Request* request);
 
 // sync.c
-void sync_hard(int option, MPIPCL_REQUEST* request);
-void sync_side(enum P2P_Side driver, MPIPCL_REQUEST* request);
+void sync_hard(int option, MPIP_Request* request);
+void sync_side(enum P2P_Side driver, MPIP_Request* request);
 void* threaded_sync_driver(void* args);
 
 // send.c
 // send functions
-void send_ready(MPIPCL_REQUEST* request);
-void general_send(int id, MPIPCL_REQUEST* request);
+void send_ready(MPIP_Request* request);
+void general_send(int id, MPIP_Request* request);
 
 // remap functions
-int map_recv_buffer(int id, MPIPCL_REQUEST* request);
+int map_recv_buffer(int id, MPIP_Request* request);
 
 // debug functions
 #if defined(WITH_DEBUG)

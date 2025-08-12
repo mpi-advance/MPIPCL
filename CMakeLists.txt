@@ -7,12 +7,6 @@ option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
 option(WITH_DEBUG "Turn debug statements on or off." OFF)
 option(BUILD_EXAMPLES "Turn on building of MPIPCL Examples." OFF)
 cmake_dependent_option(EXAMPLES_TO_BIN "Create examples in <install>/bin. requires BUILD_EXAMPLES" OFF "BUILD_EXAMPLES" OFF)
-option(UNIQUE_NAMES "Changes the types and names of functions to MPIP instead of MPIX." OFF)
-
-## Check for incompatible options
-if(UNIQUE_NAMES AND BUILD_EXAMPLES)
-	message( FATAL_ERROR "No examples currently exist using the MPIP version of the API")
-endif()
 
 ##### Create main project target: MPIPCL #####
 add_library(MPIPCL "")
@@ -48,12 +42,6 @@ endif()
 if(WITH_DEBUG)
 	message(STATUS "Enabling debugging print outs")
 	add_definitions(-DWITH_DEBUG)
-endif()
-
-if(UNIQUE_NAMES)
-	message(STATUS "Using MPIP instead of MPIX for APIs")
-	# PUBLIC target for both this library and anyone who uses it
-	target_compile_definitions (MPIPCL PUBLIC MPIPCL_UNIQUE_NAMES=1 )
 endif()
 
 # Find extra libraries to link to
