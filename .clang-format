@@ -26,5 +26,9 @@ BinPackParameters: false
 
 ColumnLimit: 90
 
+<<<<<<< HEAD
 InsertBraces: true
 
+=======
+InsertBraces: true
+>>>>>>> 03cfcb5 (Added option for always having braces, even on single line statements)
