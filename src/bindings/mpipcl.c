@@ -274,7 +274,9 @@ int MPIP_Test(MPIP_Request* request, int* flag, MPI_Status* status)
     assert(MPI_SUCCESS == ret_val);
 
     if (*flag == 1)
+    {
         request->state = INACTIVE;
+    }
 
     /* NOTE: MPI_Status object is not updated */
     return MPI_SUCCESS;

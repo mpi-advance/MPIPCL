@@ -25,3 +25,5 @@ BinPackArguments: false
 BinPackParameters: false
 
 ColumnLimit: 90
+
+InsertBraces: true

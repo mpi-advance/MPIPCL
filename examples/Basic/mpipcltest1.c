@@ -59,7 +59,9 @@ int main(int argc, char* argv[])
         {
             /* initialize part of buffer in each thread */
             for (j = 0; j < count; j++)
+            {
                 buf[j + i * count] = j + i * count + 1.0;
+            }
 
             /* indicate buffer is ready */
             MPIP_Pready(i, &req);
@@ -76,7 +78,9 @@ int main(int argc, char* argv[])
 
         /* compute the sum of the values received */
         for (i = 0, sum = 0.0; i < bufsize; i++)
+        {
             sum += buf[i];
+        }
 
         printf("#partitions = %d bufsize = %d count = %d sum = %f\n",
                nparts,

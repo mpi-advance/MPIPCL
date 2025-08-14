@@ -54,9 +54,13 @@ int main(int argc, char* argv[])
     for (int i = 0; i < bufsize; i++)
     {
         if (rank != 0)
+        {
             buf[i] = 0.0;
+        }
         else
+        {
             buf[i] = i + 1.0;
+        }
     }
     printf("buffer: %p\n", (void*)buf);
 
@@ -143,7 +147,9 @@ int main(int argc, char* argv[])
 
         printf("Testsome complete count: %d \n", complete);
         for (int i = 0; i < complete; i++)
+        {
             printf("%d ", indices[i]);
+        }
         printf("\n");
 
         /* start final request */
@@ -158,7 +164,9 @@ int main(int argc, char* argv[])
         /* compute the sum of the values received */
         double sum = 0.0;
         for (int i = 0; i < bufsize; i++)
+        {
             sum += buf[i];
+        }
 
         for (int j = 0; j < NUMREQ; j++)
         {

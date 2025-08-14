@@ -79,12 +79,24 @@ typedef struct _MPIP_Request
 
 //----------------------------------------------------------------------------------------------
 
-int MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype,
-                    int dest, int tag, MPI_Comm comm, MPI_Info info,
+int MPIP_Psend_init(void* buf,
+                    int partitions,
+                    MPI_Count count,
+                    MPI_Datatype datatype,
+                    int dest,
+                    int tag,
+                    MPI_Comm comm,
+                    MPI_Info info,
                     MPIP_Request* request);
 
-int MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype,
-                    int dest, int tag, MPI_Comm comm, MPI_Info info,
+int MPIP_Precv_init(void* buf,
+                    int partitions,
+                    MPI_Count count,
+                    MPI_Datatype datatype,
+                    int dest,
+                    int tag,
+                    MPI_Comm comm,
+                    MPI_Info info,
                     MPIP_Request* request);
 
 int MPIP_Pready(int partition, MPIP_Request* request);
@@ -99,27 +111,47 @@ int MPIP_Start(MPIP_Request* request);
 int MPIP_Startall(int count, MPIP_Request array_of_requests[]);
 
 int MPIP_Wait(MPIP_Request* request, MPI_Status* status);
-int MPIP_Waitall(int count, MPIP_Request array_of_requests[],
+int MPIP_Waitall(int count,
+                 MPIP_Request array_of_requests[],
                  MPI_Status array_of_statuses[]);
-int MPIP_Waitany(int count, MPIP_Request array_of_requests[], int* index,
+int MPIP_Waitany(int count,
+                 MPIP_Request array_of_requests[],
+                 int* index,
                  MPI_Status* status);
-int MPIP_Waitsome(int incount, MPIP_Request array_of_requests[], int* outcount,
-                  int array_of_indices[], MPI_Status array_of_statuses[]);
+int MPIP_Waitsome(int incount,
+                  MPIP_Request array_of_requests[],
+                  int* outcount,
+                  int array_of_indices[],
+                  MPI_Status array_of_statuses[]);
 
 int MPIP_Test(MPIP_Request* request, int* flag, MPI_Status* status);
-int MPIP_Testall(int count, MPIP_Request array_of_requests[], int* flag,
+int MPIP_Testall(int count,
+                 MPIP_Request array_of_requests[],
+                 int* flag,
                  MPI_Status array_of_statuses[]);
-int MPIP_Testany(int count, MPIP_Request array_of_requests[], int* index, int* flag,
+int MPIP_Testany(int count,
+                 MPIP_Request array_of_requests[],
+                 int* index,
+                 int* flag,
                  MPI_Status* status);
-int MPIP_Testsome(int incount, MPIP_Request array_of_requests[], int* outcount,
-                  int array_of_indices[], MPI_Status array_of_statuses[]);
+int MPIP_Testsome(int incount,
+                  MPIP_Request array_of_requests[],
+                  int* outcount,
+                  int array_of_indices[],
+                  MPI_Status array_of_statuses[]);
 
 int MPIP_Request_free(MPIP_Request* request);
 
 // functions current defined outside of mpipcl
 // setup.c
-void prep(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int opp,
-          int tag, MPI_Comm comm, MPIP_Request* request);
+void prep(void* buf,
+          int partitions,
+          MPI_Count count,
+          MPI_Datatype datatype,
+          int opp,
+          int tag,
+          MPI_Comm comm,
+          MPIP_Request* request);
 int sync_driver(MPI_Info info, MPIP_Request* request);
 void internal_setup(MPIP_Request* request);
 void reset_status(MPIP_Request* request);

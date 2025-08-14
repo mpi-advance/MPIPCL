@@ -73,7 +73,9 @@ int sync_driver(MPI_Info info, MPIP_Request* request)
 
             int set = atoi(option);
             if (set <= 0)
+            {
                 set = 1;
+            }
             sync_hard(set, request);
         }
         else if (strcmp("SENDER", mode) == 0 || strcmp("RECEIVER", mode) == 0)

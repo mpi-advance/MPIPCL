@@ -74,7 +74,9 @@ int main(int argc, char* argv[])
 
         /* initialize buffer */
         for (i = 0; i < bufsize; i++)
+        {
             buf[i] = i + 1.0;
+        }
 
         rc = MPIP_Startall(NNEIGHBORS, req);
         assert(rc == MPI_SUCCESS);
@@ -114,7 +116,9 @@ int main(int argc, char* argv[])
 
         /* compute the sum of the values received */
         for (i = 0, sum = 0.0; i < bufsize; i++)
+        {
             sum += buf[i];
+        }
 
         rc = MPIP_Request_free(&req[0]);
         assert(rc == MPI_SUCCESS);

@@ -79,7 +79,9 @@ int main(int argc, char* argv[])
         {
             /* initialize part of buffer in each thread */
             for (j = 0; j < count; j++)
+            {
                 buf[j + i * count] = j + i * count + 1.0;
+            }
 
             /* indicate buffer is ready for all sends */
             for (j = 0; j < NNEIGHBORS; j++)
@@ -122,7 +124,9 @@ int main(int argc, char* argv[])
                 {
                     /* compute the partial sum of the values received */
                     for (j = 0, mysum = 0.0; j < count; j++)
+                    {
                         mysum += buf[j + i * count];
+                    }
 
 /* update global sum */
 #pragma omp critical

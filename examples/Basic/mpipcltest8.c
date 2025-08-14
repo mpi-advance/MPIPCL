@@ -34,7 +34,9 @@ static inline void exchange(
         {
             /* initialize part of buffer in each thread */
             for (j = 0; j < count; j++)
+            {
                 buf[j + i * count] = j + i * count + 1.0;
+            }
 
             /* indicate buffer is ready */
             MPIP_Pready(i, &req);
@@ -61,7 +63,9 @@ static inline void exchange(
         double sum = 0.0;
         /* compute the sum of the values received */
         for (i = 0, sum = 0.0; i < bufsize; i++)
+        {
             sum += buf[i];
+        }
 
         MPIP_Wait(&req, &status);
         printf("#partitions = %d bufsize = %d count = %d sum = %f\n",
