@@ -7,9 +7,15 @@ extern "C" {
 /* Initial implementation of partitioned communication API */
 
 // Init functions - call function in setup.c
-int MPIP_Psend_init(void* buf, int partitions, MPI_Count count,
-                        MPI_Datatype datatype, int dest, int tag, MPI_Comm comm,
-                        MPI_Info info, MPIP_Request* request)
+int MPIP_Psend_init(void* buf,
+                    int partitions,
+                    MPI_Count count,
+                    MPI_Datatype datatype,
+                    int dest,
+                    int tag,
+                    MPI_Comm comm,
+                    MPI_Info info,
+                    MPIP_Request* request)
 {
     request->side = SENDER;
     prep(buf, partitions, count, datatype, dest, tag, comm, request);
@@ -18,9 +24,15 @@ int MPIP_Psend_init(void* buf, int partitions, MPI_Count count,
     return MPI_SUCCESS;
 }
 
-int MPIP_Precv_init(void* buf, int partitions, MPI_Count count,
-                        MPI_Datatype datatype, int dest, int tag, MPI_Comm comm,
-                        MPI_Info info, MPIP_Request* request)
+int MPIP_Precv_init(void* buf,
+                    int partitions,
+                    MPI_Count count,
+                    MPI_Datatype datatype,
+                    int dest,
+                    int tag,
+                    MPI_Comm comm,
+                    MPI_Info info,
+                    MPIP_Request* request)
 {
     request->side = RECEIVER;
     prep(buf, partitions, count, datatype, dest, tag, comm, request);
@@ -56,8 +68,7 @@ int MPIP_Pready(int partition, MPIP_Request* request)
     return MPI_SUCCESS;
 }
 
-int MPIP_Pready_range(int partition_low, int partition_high,
-                          MPIP_Request* request)
+int MPIP_Pready_range(int partition_low, int partition_high, MPIP_Request* request)
 {
     for (int i = partition_low; i <= partition_high; i++)
     {
@@ -67,8 +78,7 @@ int MPIP_Pready_range(int partition_low, int partition_high,
     return MPI_SUCCESS;
 }
 
-int MPIP_Pready_list(int length, int array_of_partitions[],
-                         MPIP_Request* request)
+int MPIP_Pready_list(int length, int array_of_partitions[], MPIP_Request* request)
 {
     for (int i = 0; i < length; i++)
     {
@@ -158,10 +168,9 @@ int MPIP_Wait(MPIP_Request* request, MPI_Status* status)
     }
 
     // once setup is complete, wait on all internal partitions.
-    MPIPCL_DEBUG("Waiting on %d reqs at address %p\n", request->parts,
-                 (void*)request->request);
-    int ret_val =
-        MPI_Waitall(request->parts, request->request, MPI_STATUSES_IGNORE);
+    MPIPCL_DEBUG(
+        "Waiting on %d reqs at address %p\n", request->parts, (void*)request->request);
+    int ret_val = MPI_Waitall(request->parts, request->request, MPI_STATUSES_IGNORE);
     assert(MPI_SUCCESS == ret_val);
 
     // set state to inactive.
@@ -170,8 +179,9 @@ int MPIP_Wait(MPIP_Request* request, MPI_Status* status)
     return MPI_SUCCESS;
 }
 
-int MPIP_Waitall(int count, MPIP_Request array_of_requests[],
-                     MPI_Status array_of_statuses[])
+int MPIP_Waitall(int count,
+                 MPIP_Request array_of_requests[],
+                 MPI_Status array_of_statuses[])
 {
     MPIPCL_DEBUG("Will wait on: %d\n", count);
     for (int i = 0; i < count; i++)
@@ -183,8 +193,10 @@ int MPIP_Waitall(int count, MPIP_Request array_of_requests[],
     return MPI_SUCCESS;
 }
 
-int MPIP_Waitany(int count, MPIP_Request array_of_requests[], int* index,
-                     MPI_Status* status)
+int MPIP_Waitany(int count,
+                 MPIP_Request array_of_requests[],
+                 int* index,
+                 MPI_Status* status)
 {
     MPIPCL_DEBUG("MPIP_Waitany\n");
     int flag = 0;
@@ -192,8 +204,7 @@ int MPIP_Waitany(int count, MPIP_Request array_of_requests[], int* index,
     {
         for (int i = 0; i < count; i++)
         { /* NOTE: MPI_Status object is not updated */
-            int ret_val =
-                MPIP_Test(&array_of_requests[i], &flag, MPI_STATUS_IGNORE);
+            int ret_val = MPIP_Test(&array_of_requests[i], &flag, MPI_STATUS_IGNORE);
             assert(MPI_SUCCESS == ret_val);
             if (flag == 1)
             {
@@ -206,9 +217,11 @@ int MPIP_Waitany(int count, MPIP_Request array_of_requests[], int* index,
     return MPI_SUCCESS;
 }
 
-int MPIP_Waitsome(int incount, MPIP_Request array_of_requests[],
-                      int* outcount, int array_of_indices[],
-                      MPI_Status array_of_statuses[])
+int MPIP_Waitsome(int incount,
+                  MPIP_Request array_of_requests[],
+                  int* outcount,
+                  int array_of_indices[],
+                  MPI_Status array_of_statuses[])
 {
     MPIPCL_DEBUG("MPIP_Waitsome\n");
     int j = 0, flag = 0;
@@ -218,8 +231,7 @@ int MPIP_Waitsome(int incount, MPIP_Request array_of_requests[],
     {
         for (int i = 0; i < incount; i++)
         {
-            int ret_val =
-                MPIP_Test(&array_of_requests[i], &flag, MPI_STATUS_IGNORE);
+            int ret_val = MPIP_Test(&array_of_requests[i], &flag, MPI_STATUS_IGNORE);
             assert(MPI_SUCCESS == ret_val);
             if (flag == 1)
             {
@@ -240,9 +252,8 @@ int MPIP_Test(MPIP_Request* request, int* flag, MPI_Status* status)
 
     if (request == NULL || request->state == INACTIVE)
     {
-        MPIPCL_DEBUG(
-            "Early MPIP Test exit due to null or inactive request: %p\n",
-            (void*)request);
+        MPIPCL_DEBUG("Early MPIP Test exit due to null or inactive request: %p\n",
+                     (void*)request);
         return MPI_SUCCESS;
     }
 
@@ -258,27 +269,30 @@ int MPIP_Test(MPIP_Request* request, int* flag, MPI_Status* status)
     }
 
     // else test status of each request in communication.]
-    int ret_val = MPI_Testall(request->parts, request->request, flag,
-                              MPI_STATUSES_IGNORE);
+    int ret_val =
+        MPI_Testall(request->parts, request->request, flag, MPI_STATUSES_IGNORE);
     assert(MPI_SUCCESS == ret_val);
 
     if (*flag == 1)
+    {
         request->state = INACTIVE;
+    }
 
     /* NOTE: MPI_Status object is not updated */
     return MPI_SUCCESS;
 }
 
-int MPIP_Testall(int count, MPIP_Request array_of_requests[], int* flag,
-                     MPI_Status array_of_statuses[])
+int MPIP_Testall(int count,
+                 MPIP_Request array_of_requests[],
+                 int* flag,
+                 MPI_Status array_of_statuses[])
 {
     MPIPCL_DEBUG("MPIP_Testall\n");
     int myflag;
     *flag = 1;
     for (int i = 0; i < count; i++)
     {
-        int ret_val =
-            MPIP_Test(&array_of_requests[i], &myflag, MPI_STATUS_IGNORE);
+        int ret_val = MPIP_Test(&array_of_requests[i], &myflag, MPI_STATUS_IGNORE);
         assert(MPI_SUCCESS == ret_val);
         *flag = *flag & myflag;
     }
@@ -287,15 +301,17 @@ int MPIP_Testall(int count, MPIP_Request array_of_requests[], int* flag,
     return MPI_SUCCESS;
 }
 
-int MPIP_Testany(int count, MPIP_Request array_of_requests[], int* index,
-                     int* flag, MPI_Status* status)
+int MPIP_Testany(int count,
+                 MPIP_Request array_of_requests[],
+                 int* index,
+                 int* flag,
+                 MPI_Status* status)
 {
     MPIPCL_DEBUG("MPIP_Testany\n");
     // for each MPIP_Request in provided array
     for (int i = 0; i < count; i++)
     {
-        int ret_val =
-            MPIP_Test(&array_of_requests[i], flag, MPI_STATUS_IGNORE);
+        int ret_val = MPIP_Test(&array_of_requests[i], flag, MPI_STATUS_IGNORE);
         assert(MPI_SUCCESS == ret_val);
         if (*flag == 1)
         {
@@ -306,17 +322,18 @@ int MPIP_Testany(int count, MPIP_Request array_of_requests[], int* index,
     return MPI_SUCCESS;
 }
 
-int MPIP_Testsome(int incount, MPIP_Request array_of_requests[],
-                      int* outcount, int array_of_indices[],
-                      MPI_Status array_of_statuses[])
+int MPIP_Testsome(int incount,
+                  MPIP_Request array_of_requests[],
+                  int* outcount,
+                  int array_of_indices[],
+                  MPI_Status array_of_statuses[])
 {
     MPIPCL_DEBUG("MPIP_Testsome\n");
     int j = 0, flag = 0;
     *outcount = 0;
     for (int i = 0; i < incount; i++)
     {
-        int ret_val =
-            MPIP_Test(&array_of_requests[i], &flag, MPI_STATUS_IGNORE);
+        int ret_val = MPIP_Test(&array_of_requests[i], &flag, MPI_STATUS_IGNORE);
         assert(MPI_SUCCESS == ret_val);
         if (flag == 1)
         {

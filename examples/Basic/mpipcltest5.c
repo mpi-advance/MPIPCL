@@ -54,9 +54,13 @@ int main(int argc, char* argv[])
     for (int i = 0; i < bufsize; i++)
     {
         if (rank != 0)
+        {
             buf[i] = 0.0;
+        }
         else
+        {
             buf[i] = i + 1.0;
+        }
     }
     printf("buffer: %p\n", (void*)buf);
 
@@ -65,8 +69,15 @@ int main(int argc, char* argv[])
         /* make the requests */
         for (int i = 0; i < NUMREQ; i++)
         {
-            rc = MPIP_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, i,
-                                 MPI_COMM_WORLD, MPI_INFO_NULL, &req[i]);
+            rc = MPIP_Psend_init(buf,
+                                 nparts,
+                                 count,
+                                 MPI_DOUBLE,
+                                 1,
+                                 i,
+                                 MPI_COMM_WORLD,
+                                 MPI_INFO_NULL,
+                                 &req[i]);
             assert(rc == MPI_SUCCESS);
         }
 
@@ -95,8 +106,15 @@ int main(int argc, char* argv[])
         /* make requests */
         for (int i = 0; i < NUMREQ; i++)
         {
-            rc = MPIP_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, i,
-                                 MPI_COMM_WORLD, MPI_INFO_NULL, &req[i]);
+            rc = MPIP_Precv_init(buf,
+                                 nparts,
+                                 count,
+                                 MPI_DOUBLE,
+                                 0,
+                                 i,
+                                 MPI_COMM_WORLD,
+                                 MPI_INFO_NULL,
+                                 &req[i]);
             assert(rc == MPI_SUCCESS);
         }
 
@@ -110,7 +128,7 @@ int main(int argc, char* argv[])
         /* wait for a request to complete */
         int indices[NUMREQ];
         int complete = -1;  // number of complete requests
-        rc = MPIP_Waitsome(NUMREQ, req, &complete, indices, MPI_STATUS_IGNORE);
+        rc           = MPIP_Waitsome(NUMREQ, req, &complete, indices, MPI_STATUS_IGNORE);
         assert(rc == MPI_SUCCESS);
 
         printf("Wait completed: %d (count: %d) \n", indices[0], complete);
@@ -124,12 +142,14 @@ int main(int argc, char* argv[])
         /* Testsome -- see if incomplete request is returned (it shouldn't be)
          */
         complete = -1;
-        rc = MPIP_Testsome(NUMREQ, req, &complete, indices, MPI_STATUS_IGNORE);
+        rc       = MPIP_Testsome(NUMREQ, req, &complete, indices, MPI_STATUS_IGNORE);
         assert(rc == MPI_SUCCESS);
 
         printf("Testsome complete count: %d \n", complete);
         for (int i = 0; i < complete; i++)
+        {
             printf("%d ", indices[i]);
+        }
         printf("\n");
 
         /* start final request */
@@ -144,7 +164,9 @@ int main(int argc, char* argv[])
         /* compute the sum of the values received */
         double sum = 0.0;
         for (int i = 0; i < bufsize; i++)
+        {
             sum += buf[i];
+        }
 
         for (int j = 0; j < NUMREQ; j++)
         {
@@ -153,7 +175,11 @@ int main(int argc, char* argv[])
         }
 
         printf("[%d]: #partitions = %d bufsize = %d count = %d sum = %f (%f)\n",
-               rank, nparts, bufsize, count, sum,
+               rank,
+               nparts,
+               bufsize,
+               count,
+               sum,
                ((double)bufsize * (bufsize + 1)) / 2.0);
     }
 

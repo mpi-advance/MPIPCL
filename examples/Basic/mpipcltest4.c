@@ -53,22 +53,35 @@ int main(int argc, char* argv[])
     { /* sender */
         for (i = 1; i <= NNEIGHBORS; i++)
         {
-            rc = MPIP_Psend_init(buf, nparts, count, MPI_DOUBLE, i, tag,
-                                 MPI_COMM_WORLD, MPI_INFO_NULL, &req[i - 1]);
+            rc = MPIP_Psend_init(buf,
+                                 nparts,
+                                 count,
+                                 MPI_DOUBLE,
+                                 i,
+                                 tag,
+                                 MPI_COMM_WORLD,
+                                 MPI_INFO_NULL,
+                                 &req[i - 1]);
             assert(rc == MPI_SUCCESS);
         }
 
         rc = MPIP_Startall(NNEIGHBORS, req);
         assert(rc == MPI_SUCCESS);
-        printf("[%d]: nparts = %d bufsize = %d count = %d size = %d\n", rank,
-               nparts, bufsize, count, size);
+        printf("[%d]: nparts = %d bufsize = %d count = %d size = %d\n",
+               rank,
+               nparts,
+               bufsize,
+               count,
+               size);
 
 #pragma omp parallel for private(j) shared(buf, req) num_threads(nparts)
         for (i = 0; i < nparts; i++)
         {
             /* initialize part of buffer in each thread */
             for (j = 0; j < count; j++)
+            {
                 buf[j + i * count] = j + i * count + 1.0;
+            }
 
             /* indicate buffer is ready for all sends */
             for (j = 0; j < NNEIGHBORS; j++)
@@ -90,8 +103,8 @@ int main(int argc, char* argv[])
     { /* receiver */
         MPIP_Request req;
 
-        rc = MPIP_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag,
-                             MPI_COMM_WORLD, MPI_INFO_NULL, &req);
+        rc = MPIP_Precv_init(
+            buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req);
         assert(rc == MPI_SUCCESS);
         rc = MPIP_Start(&req);
         assert(rc == MPI_SUCCESS);
@@ -111,7 +124,9 @@ int main(int argc, char* argv[])
                 {
                     /* compute the partial sum of the values received */
                     for (j = 0, mysum = 0.0; j < count; j++)
+                    {
                         mysum += buf[j + i * count];
+                    }
 
 /* update global sum */
 #pragma omp critical
@@ -129,7 +144,11 @@ int main(int argc, char* argv[])
         rc = MPIP_Wait(&req, MPI_STATUS_IGNORE);
         assert(rc == MPI_SUCCESS);
         printf("[%d]: #partitions = %d bufsize = %d count = %d sum = %f (%f)\n",
-               rank, nparts, bufsize, count, sum,
+               rank,
+               nparts,
+               bufsize,
+               count,
+               sum,
                ((double)bufsize * (bufsize + 1)) / 2.0);
         rc = MPIP_Request_free(&req);
         assert(rc == MPI_SUCCESS);

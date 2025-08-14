@@ -18,19 +18,18 @@ void send_ready(MPIP_Request* request)
 
 static inline void map_local_to_network_partitions(int user_partition_id,
                                                    MPIP_Request* request,
-                                                   int* start, int* end)
+                                                   int* start,
+                                                   int* end)
 {
     int user_partitions    = request->local_parts;
     int network_partitions = request->parts;
 
     int temp_start = (network_partitions / user_partitions) * user_partition_id;
-    int temp_end =
-        ceil(network_partitions / user_partitions) * (user_partition_id + 1);
+    int temp_end   = ceil(network_partitions / user_partitions) * (user_partition_id + 1);
 
-    MPIPCL_DEBUG("Partition %d - Start %d End %d \n", user_partition_id,
-                 temp_start, temp_end);
-    assert(temp_start >= 0 && temp_end > temp_start &&
-           temp_end <= network_partitions);
+    MPIPCL_DEBUG(
+        "Partition %d - Start %d End %d \n", user_partition_id, temp_start, temp_end);
+    assert(temp_start >= 0 && temp_end > temp_start && temp_end <= network_partitions);
 
     *start = temp_start;
     *end   = temp_end;
@@ -43,7 +42,8 @@ void general_send(int id, MPIP_Request* request)
     int end_part   = 0;
     int threshold  = 0;
     MPIPCL_DEBUG("User Partitions %d - Network Partitions %d\n",
-                 request->local_parts, request->parts);
+                 request->local_parts,
+                 request->parts);
     if (request->local_parts <= request->parts)
     {
         map_local_to_network_partitions(id, request, &start_part, &end_part);
@@ -56,8 +56,7 @@ void general_send(int id, MPIP_Request* request)
         end_part   = start_part + 1;
     }
 
-    MPIPCL_DEBUG("User Partition %d - Start %d End %d \n", id, start_part,
-                 end_part);
+    MPIPCL_DEBUG("User Partition %d - Start %d End %d \n", id, start_part, end_part);
 
     // for each internal request affected
     for (int i = start_part; i < end_part; i++)
@@ -66,16 +65,17 @@ void general_send(int id, MPIP_Request* request)
         int prior_value = atomic_fetch_add_explicit(
             &request->internal_status[i], 1, memory_order_relaxed);
 
-        MPIPCL_DEBUG("Network Partition %d - Count: %d, Threshold: %d\n", i,
-                     prior_value + 1, threshold);
+        MPIPCL_DEBUG("Network Partition %d - Count: %d, Threshold: %d\n",
+                     i,
+                     prior_value + 1,
+                     threshold);
 
         // if the number of local partitions needed for one network partition
         // are ready
         if (prior_value + 1 == threshold)
         {
             // start associated request
-            MPIPCL_DEBUG("Starting request %d %p \n", i,
-                         (void*)(&request->request[i]));
+            MPIPCL_DEBUG("Starting request %d %p \n", i, (void*)(&request->request[i]));
             int ret_val = MPI_Start(&request->request[i]);
             assert(MPI_SUCCESS == ret_val);
         }
@@ -108,10 +108,11 @@ int map_recv_buffer(int id, MPIP_Request* request)
     // check status of dependent requests
     int flag = 0;
     MPIPCL_DEBUG("User Partitions %d - Network Partitions %d\n",
-                 request->local_parts, request->parts);
+                 request->local_parts,
+                 request->parts);
     MPIPCL_DEBUG("Checking Requests: [%d: %d)\n", start, end);
-    int ret_val = MPI_Testall(end - start, &request->request[start], &flag,
-                              MPI_STATUSES_IGNORE);
+    int ret_val =
+        MPI_Testall(end - start, &request->request[start], &flag, MPI_STATUSES_IGNORE);
     assert(MPI_SUCCESS == ret_val);
 
     // if true store for future shortcut
