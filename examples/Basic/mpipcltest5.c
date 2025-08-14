@@ -1,7 +1,7 @@
 /* Sample program to test the partitioned communication API.
 
- * This program tests MPIX_Waitsome and MPIX_Testsome
- * MPIX_Waitall functions.
+ * This program tests MPIP_Waitsome and MPIP_Testsome
+ * MPIP_Waitall functions.
  *
  * To compile:
  *    mpicc -O -Wall -fopenmp -o mpipcltest5 mpipcltest5.c mpipcl.c
@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
     int rank, size, nparts, bufsize, count, rc = 0;
     int provided;
     double* buf;
-    MPIX_Request req[NUMREQ];
+    MPIP_Request req[NUMREQ];
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
     assert(provided == MPI_THREAD_SERIALIZED);
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
         /* make the requests */
         for (int i = 0; i < NUMREQ; i++)
         {
-            rc = MPIX_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, i,
+            rc = MPIP_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, i,
                                  MPI_COMM_WORLD, MPI_INFO_NULL, &req[i]);
             assert(rc == MPI_SUCCESS);
         }
@@ -73,19 +73,19 @@ int main(int argc, char* argv[])
         for (int j = 0; j < NUMREQ; j++)
         {
             /* start request */
-            rc = MPIX_Start(&req[j]);
+            rc = MPIP_Start(&req[j]);
             assert(rc == MPI_SUCCESS);
 
             /* indicate buffer is ready */
-            rc = MPIX_Pready_range(0, nparts - 1, &req[j]);
+            rc = MPIP_Pready_range(0, nparts - 1, &req[j]);
             assert(rc == MPI_SUCCESS);
 
             /* wait for first request to complete before starting next */
-            rc = MPIX_Wait(&req[j], MPI_STATUSES_IGNORE);
+            rc = MPIP_Wait(&req[j], MPI_STATUSES_IGNORE);
             assert(rc == MPI_SUCCESS);
 
             /* clean up */
-            rc = MPIX_Request_free(&req[j]);
+            rc = MPIP_Request_free(&req[j]);
             assert(rc == MPI_SUCCESS);
         }
     }
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
         /* make requests */
         for (int i = 0; i < NUMREQ; i++)
         {
-            rc = MPIX_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, i,
+            rc = MPIP_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, i,
                                  MPI_COMM_WORLD, MPI_INFO_NULL, &req[i]);
             assert(rc == MPI_SUCCESS);
         }
@@ -103,14 +103,14 @@ int main(int argc, char* argv[])
         /* start all but last request */
         for (int k = 0; k < NUMREQ - 1; k++)
         {
-            rc = MPIX_Start(&req[k]);
+            rc = MPIP_Start(&req[k]);
             assert(rc == MPI_SUCCESS);
         }
 
         /* wait for a request to complete */
         int indices[NUMREQ];
         int complete = -1;  // number of complete requests
-        rc = MPIX_Waitsome(NUMREQ, req, &complete, indices, MPI_STATUS_IGNORE);
+        rc = MPIP_Waitsome(NUMREQ, req, &complete, indices, MPI_STATUS_IGNORE);
         assert(rc == MPI_SUCCESS);
 
         printf("Wait completed: %d (count: %d) \n", indices[0], complete);
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
         /* Testsome -- see if incomplete request is returned (it shouldn't be)
          */
         complete = -1;
-        rc = MPIX_Testsome(NUMREQ, req, &complete, indices, MPI_STATUS_IGNORE);
+        rc = MPIP_Testsome(NUMREQ, req, &complete, indices, MPI_STATUS_IGNORE);
         assert(rc == MPI_SUCCESS);
 
         printf("Testsome complete count: %d \n", complete);
@@ -133,11 +133,11 @@ int main(int argc, char* argv[])
         printf("\n");
 
         /* start final request */
-        rc = MPIX_Start(&req[NUMREQ - 1]);
+        rc = MPIP_Start(&req[NUMREQ - 1]);
         assert(rc == MPI_SUCCESS);
 
         /* wait for second to complete */
-        rc = MPIX_Waitall(NUMREQ, req, MPI_STATUS_IGNORE);
+        rc = MPIP_Waitall(NUMREQ, req, MPI_STATUS_IGNORE);
         assert(rc == MPI_SUCCESS);
         printf("Second request complete\n");
 
@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
 
         for (int j = 0; j < NUMREQ; j++)
         {
-            rc = MPIX_Request_free(&req[j]);
+            rc = MPIP_Request_free(&req[j]);
             assert(rc == MPI_SUCCESS);
         }
 
