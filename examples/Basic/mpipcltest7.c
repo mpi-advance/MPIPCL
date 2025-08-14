@@ -98,8 +98,8 @@ int main(int argc, char* argv[])
         for (i = 0, sum = 0.0; i < bufsize; i++)
             sum += buf[i];
 
-        printf("#partitions = %d bufsize = %d count = %d sum = %f\n", nparts,
-               bufsize, count, sum);
+        printf("#partitions = %d bufsize = %d count = %d sum = %f\n", nparts, bufsize,
+               count, sum);
     }
 
     MPIP_Request_free(&req);

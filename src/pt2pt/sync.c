@@ -30,8 +30,8 @@ void sync_side(enum P2P_Side driver, MPIP_Request* request)
     request->parts = syncdata[0];
     request->size  = syncdata[1];
 
-    MPIPCL_DEBUG("%d : sync data received %d %d \n", request->side,
-                 request->parts, request->size);
+    MPIPCL_DEBUG("%d : sync data received %d %d \n", request->side, request->parts,
+                 request->size);
 }
 
 // instructions for synchronization thread
@@ -49,15 +49,13 @@ void* threaded_sync_driver(void* args)
     // if request is active(MPI_Start), run catchup tasks.
     if (request->side == RECEIVER && request->state == ACTIVE)
     {
-        MPIPCL_DEBUG("%d THREAD IS STARTING RECVS:%d \n", request->side,
-                     request->size);
+        MPIPCL_DEBUG("%d THREAD IS STARTING RECVS:%d \n", request->side, request->size);
         int ret_val = MPI_Startall(request->parts, request->request);
         assert(MPI_SUCCESS == ret_val);
     }
     else if (request->side == SENDER && request->state == ACTIVE)
     {
-        MPIPCL_DEBUG("%d THREAD IS STARTING SENDS:%d \n", request->side,
-                     request->size)
+        MPIPCL_DEBUG("%d THREAD IS STARTING SENDS:%d \n", request->side, request->size)
         send_ready(request);
     }
     // once caught up, signal thread completion and return.

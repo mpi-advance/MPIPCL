@@ -96,9 +96,8 @@ int main(int argc, char* argv[])
         }
 
         MPIP_Wait(&req, MPI_STATUS_IGNORE);
-        printf("#partitions = %d bufsize = %d count = %d sum = %f (%f)\n",
-               nparts, bufsize, count, sum,
-               ((double)bufsize * (bufsize + 1)) / 2.0);
+        printf("#partitions = %d bufsize = %d count = %d sum = %f (%f)\n", nparts,
+               bufsize, count, sum, ((double)bufsize * (bufsize + 1)) / 2.0);
     }
 
     MPIP_Request_free(&req);

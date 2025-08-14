@@ -20,3 +20,4 @@ AlignConsecutiveAssignments: true
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
+ColumnLimit: 90
