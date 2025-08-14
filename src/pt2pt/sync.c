@@ -30,8 +30,8 @@ void sync_side(enum P2P_Side driver, MPIP_Request* request)
     request->parts = syncdata[0];
     request->size  = syncdata[1];
 
-    MPIPCL_DEBUG("%d : sync data received %d %d \n", request->side, request->parts,
-                 request->size);
+    MPIPCL_DEBUG(
+        "%d : sync data received %d %d \n", request->side, request->parts, request->size);
 }
 
 // instructions for synchronization thread

@@ -58,8 +58,8 @@ int main(int argc, char* argv[])
 
     if (rank == 0)
     { /* sender */
-        MPIP_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD,
-                        MPI_INFO_NULL, &req);
+        MPIP_Psend_init(
+            buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req);
         MPIP_Start(&req);
 
         for (i = 0; i < nparts; i++)
@@ -78,8 +78,8 @@ int main(int argc, char* argv[])
     { /* receiver */
         nparts *= 2;
         count = count / 2;
-        MPIP_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD,
-                        MPI_INFO_NULL, &req);
+        MPIP_Precv_init(
+            buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req);
         MPIP_Start(&req);
 
         for (i = 0; i < nparts; i++)
@@ -98,8 +98,11 @@ int main(int argc, char* argv[])
         for (i = 0, sum = 0.0; i < bufsize; i++)
             sum += buf[i];
 
-        printf("#partitions = %d bufsize = %d count = %d sum = %f\n", nparts, bufsize,
-               count, sum);
+        printf("#partitions = %d bufsize = %d count = %d sum = %f\n",
+               nparts,
+               bufsize,
+               count,
+               sum);
     }
 
     MPIP_Request_free(&req);

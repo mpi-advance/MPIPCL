@@ -53,13 +53,24 @@ int main(int argc, char* argv[])
     { /* sender */
         for (i = 1; i <= NNEIGHBORS; i++)
         {
-            rc = MPIP_Psend_init(buf, nparts, count, MPI_DOUBLE, i, tag, MPI_COMM_WORLD,
-                                 MPI_INFO_NULL, &req[i - 1]);
+            rc = MPIP_Psend_init(buf,
+                                 nparts,
+                                 count,
+                                 MPI_DOUBLE,
+                                 i,
+                                 tag,
+                                 MPI_COMM_WORLD,
+                                 MPI_INFO_NULL,
+                                 &req[i - 1]);
             assert(rc == MPI_SUCCESS);
         }
 
-        printf("[%d]: nparts = %d bufsize = %d count = %d size = %d\n", rank, nparts,
-               bufsize, count, size);
+        printf("[%d]: nparts = %d bufsize = %d count = %d size = %d\n",
+               rank,
+               nparts,
+               bufsize,
+               count,
+               size);
 
         /* initialize buffer */
         for (i = 0; i < bufsize; i++)
@@ -86,8 +97,15 @@ int main(int argc, char* argv[])
     else
     { /* receiver */
 
-        rc = MPIP_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD,
-                             MPI_INFO_NULL, &req[0]);
+        rc = MPIP_Precv_init(buf,
+                             nparts,
+                             count,
+                             MPI_DOUBLE,
+                             0,
+                             tag,
+                             MPI_COMM_WORLD,
+                             MPI_INFO_NULL,
+                             &req[0]);
         assert(rc == MPI_SUCCESS);
         rc = MPIP_Start(&req[0]);
         assert(rc == MPI_SUCCESS);
@@ -100,8 +118,13 @@ int main(int argc, char* argv[])
 
         rc = MPIP_Request_free(&req[0]);
         assert(rc == MPI_SUCCESS);
-        printf("[%d]: #partitions = %d bufsize = %d count = %d sum = %f (%f)\n", rank,
-               nparts, bufsize, count, sum, ((double)bufsize * (bufsize + 1)) / 2.0);
+        printf("[%d]: #partitions = %d bufsize = %d count = %d sum = %f (%f)\n",
+               rank,
+               nparts,
+               bufsize,
+               count,
+               sum,
+               ((double)bufsize * (bufsize + 1)) / 2.0);
     }
 
     free(buf);

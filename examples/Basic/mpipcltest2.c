@@ -50,8 +50,8 @@ int main(int argc, char* argv[])
 
     if (rank == 0)
     { /* sender */
-        MPIP_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD,
-                        MPI_INFO_NULL, &req);
+        MPIP_Psend_init(
+            buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req);
         MPIP_Start(&req);
 
 #pragma omp parallel for private(j) shared(buf, req) num_threads(nparts)
@@ -68,8 +68,8 @@ int main(int argc, char* argv[])
     }
     else
     { /* receiver */
-        MPIP_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD,
-                        MPI_INFO_NULL, &req);
+        MPIP_Precv_init(
+            buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req);
         MPIP_Start(&req);
 
 #pragma omp parallel for shared(buf, req, sum) num_threads(nparts)
@@ -96,8 +96,12 @@ int main(int argc, char* argv[])
         }
 
         MPIP_Wait(&req, MPI_STATUS_IGNORE);
-        printf("#partitions = %d bufsize = %d count = %d sum = %f (%f)\n", nparts,
-               bufsize, count, sum, ((double)bufsize * (bufsize + 1)) / 2.0);
+        printf("#partitions = %d bufsize = %d count = %d sum = %f (%f)\n",
+               nparts,
+               bufsize,
+               count,
+               sum,
+               ((double)bufsize * (bufsize + 1)) / 2.0);
     }
 
     MPIP_Request_free(&req);

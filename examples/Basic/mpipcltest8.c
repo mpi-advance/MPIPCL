@@ -14,8 +14,8 @@
 
 #include "mpipcl.h"
 
-static inline void exchange(int rank, double* buf, int bufsize, int nparts,
-                            MPI_Info the_info)
+static inline void exchange(
+    int rank, double* buf, int bufsize, int nparts, MPI_Info the_info)
 {
     int i, j;
     int tag = 0xbad;
@@ -25,8 +25,8 @@ static inline void exchange(int rank, double* buf, int bufsize, int nparts,
     int count = bufsize / nparts;
     if (0 == rank)
     { /* sender */
-        MPIP_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD, the_info,
-                        &req);
+        MPIP_Psend_init(
+            buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD, the_info, &req);
         MPIP_Start(&req);
 
 #pragma omp parallel for private(j) shared(buf, req) num_threads(nparts)
@@ -44,8 +44,8 @@ static inline void exchange(int rank, double* buf, int bufsize, int nparts,
     }
     else
     { /* receiver */
-        MPIP_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, the_info,
-                        &req);
+        MPIP_Precv_init(
+            buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, the_info, &req);
         MPIP_Start(&req);
 
         for (i = 0; i < nparts; i++)
@@ -64,8 +64,11 @@ static inline void exchange(int rank, double* buf, int bufsize, int nparts,
             sum += buf[i];
 
         MPIP_Wait(&req, &status);
-        printf("#partitions = %d bufsize = %d count = %d sum = %f\n", nparts, bufsize,
-               count, sum);
+        printf("#partitions = %d bufsize = %d count = %d sum = %f\n",
+               nparts,
+               bufsize,
+               count,
+               sum);
     }
     MPIP_Request_free(&req);
 }

@@ -65,8 +65,15 @@ int main(int argc, char* argv[])
         /* make the requests */
         for (int i = 0; i < NUMREQ; i++)
         {
-            rc = MPIP_Psend_init(buf, nparts, count, MPI_DOUBLE, 1, i, MPI_COMM_WORLD,
-                                 MPI_INFO_NULL, &req[i]);
+            rc = MPIP_Psend_init(buf,
+                                 nparts,
+                                 count,
+                                 MPI_DOUBLE,
+                                 1,
+                                 i,
+                                 MPI_COMM_WORLD,
+                                 MPI_INFO_NULL,
+                                 &req[i]);
             assert(rc == MPI_SUCCESS);
         }
 
@@ -95,8 +102,15 @@ int main(int argc, char* argv[])
         /* make requests */
         for (int i = 0; i < NUMREQ; i++)
         {
-            rc = MPIP_Precv_init(buf, nparts, count, MPI_DOUBLE, 0, i, MPI_COMM_WORLD,
-                                 MPI_INFO_NULL, &req[i]);
+            rc = MPIP_Precv_init(buf,
+                                 nparts,
+                                 count,
+                                 MPI_DOUBLE,
+                                 0,
+                                 i,
+                                 MPI_COMM_WORLD,
+                                 MPI_INFO_NULL,
+                                 &req[i]);
             assert(rc == MPI_SUCCESS);
         }
 
@@ -152,8 +166,13 @@ int main(int argc, char* argv[])
             assert(rc == MPI_SUCCESS);
         }
 
-        printf("[%d]: #partitions = %d bufsize = %d count = %d sum = %f (%f)\n", rank,
-               nparts, bufsize, count, sum, ((double)bufsize * (bufsize + 1)) / 2.0);
+        printf("[%d]: #partitions = %d bufsize = %d count = %d sum = %f (%f)\n",
+               rank,
+               nparts,
+               bufsize,
+               count,
+               sum,
+               ((double)bufsize * (bufsize + 1)) / 2.0);
     }
 
     free(buf);
