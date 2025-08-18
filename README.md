@@ -14,14 +14,14 @@ cmake <options> ..
 make
 ```
 
-### Using the Library
-In order to use the library, you will need to make sure it is either included in the RPATH or the containing directory is added to LD_LIBRARY_PATH
-and you will need to include the supplied MPIPCL.h 
-
 ### Build Options
  - -DBUILD_DYNAMIC_LIBS (ON) : create a static library instead of a shared library
  - -DBUILD_EXAMPLES (OFF): Build some examples. Examples by default are in <build>/examples/BASIC
  - -DEXAMPLES_TO_BIN(OFF) : If building examples, place examples in <install_dir>/bin instead of in build directory 
+
+### Using the Library
+In order to use the library, you will need to make sure it is either included in the RPATH or the containing directory is added to LD_LIBRARY_PATH
+and you will need to include the supplied MPIPCL.h.  
 
 # Basic Library Operation
 The library requires a basic ordering of functions calls to work as designed. The init functions must be called before anyother function. These functions setup the internal channels for communication between the processes. This process occurs on a background thread and can prevent progress until completion, however the main thread may continue uninterrupted. 
@@ -45,6 +45,7 @@ The reciever may start accepting data once the init and start functions are comp
 1. MPIP_Wait()
 
 # MPIPCL API
+
 #### Partitioned Communication API
 - MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
 - MPIP_Prev_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int src, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
@@ -133,6 +134,9 @@ MPIP_Request_free(MPIP_REQUEST* request)
         int partition: id of the partition to be checked
     - Output:
         - flag: returned TRUE if the partition has arrived, False otherwise. 
+
+#### Classes and Structs
+Information about classes and structs may be accessed by using Doxygen with the supplied DoxyFile
 
 
 ### Acknowlegments
