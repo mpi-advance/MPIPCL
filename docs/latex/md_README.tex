@@ -1,0 +1,25 @@
+Library implementation of MPI-\/4 Partitioned Communication (currently using persistent point-\/to-\/point communication).
+
+This is a component of the MPI-\/\+Advance Project!
+
+The API provided by this project can be found in {\ttfamily mpipcl.\+h} in {\ttfamily /include/}. The source code is in the {\ttfamily /src/pt2pt} folder. The current version of our library creates an individual MPI Request for each partition, that is stored in the {\ttfamily MPIX\+\_\+\+Request} object. These partition requests are launched with the respective calls to {\ttfamily MPI\+\_\+\+PREADY} (or its variants) on the send-\/side. On the receive-\/side, the partition requests are launched when the {\ttfamily MPIX\+\_\+\+Request} is started. The current version of the library also features a progress thread in the background to synchronize the number of internal partitions to use (useful for when the send-\/side and receive-\/side partitions don\textquotesingle{}t match).
+
+The current implementation makes the following assumptions/shortcuts\+: 1) The datatype is the same on both the sender and receiver processes 2) Only contiguous datatype is supported 3) The amount of data described on the send-\/side must match the amount of data described on the receive-\/side, even if the partitions do not match 4) The status object is not updated; it is ignored 5) These API are invoked in MPI\+\_\+\+THREAD\+\_\+\+SERIALIZED mode (i.\+e., MPI\+\_\+\+Init\+\_\+thread with thread support for MPI\+\_\+\+THREAD\+\_\+\+SERIALIZED is used instead of MPI\+\_\+\+Init) 6) A new MPI request object called MPIX\+\_\+\+Request is used to support partitioned communication\hypertarget{md_README_autotoc_md1}{}\doxysection{Building}\label{md_README_autotoc_md1}
+The MPIPCL library is a fairly simple cmake build\+:
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{mkdir <build\_dir>}
+\DoxyCodeLine{cd <build\_dir>}
+\DoxyCodeLine{cmake <options> ..}
+\DoxyCodeLine{make}
+
+\end{DoxyCode}
+ A loaded MPI package is required, along with CMake version 3.\+17 or higher. CMake should detect the MPI and pick the right compiler, but always double check the output to make sure.
+
+By default cmake creates a shared library in the build folder, to instead create a static library run option \textquotesingle{}-\/DBUILD\+\_\+\+DYNAMIC\+\_\+\+LIBS=OFF\textquotesingle{}\hypertarget{md_README_autotoc_md2}{}\doxysection{Examples}\label{md_README_autotoc_md2}
+There are six examples provided by this library (found in the {\ttfamily examples/\+Basic} folder) Each example has the specific execution instructions at the top, but most follow this pattern\+: {\ttfamily mpirun -\/np $<$num\+\_\+processes$>$ ./$<$test\+\_\+executable$>$ $<$npartitions$>$ $<$bufsize$>$}
+
+The first, second, and sixth example programs require only two processes, while the third, fourth, and fifth example programs require five processes. Note that {\ttfamily bufsize \% npartitions == 0} must be true for all examples and combinations of buffer sizes and number of partitions. The fifth test is testing all of the {\ttfamily MPIX\+\_\+\+Wait\textbackslash{}Test} functions and their variants.
+
+If {\ttfamily -\/DBUILD\+\_\+\+EXAMPLES=ON} is provided during the {\ttfamily cmake} command, the tests will also be built when building MPIPCL. 
