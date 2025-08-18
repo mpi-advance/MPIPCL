@@ -1,0 +1,143 @@
+\hypertarget{struct__MPIP__Request}{}\doxysection{\+\_\+\+MPIP\+\_\+\+Request Struct Reference}
+\label{struct__MPIP__Request}\index{\_MPIP\_Request@{\_MPIP\_Request}}
+
+
+{\ttfamily \#include $<$mpipcl.\+h$>$}
+
+
+
+Collaboration diagram for \+\_\+\+MPIP\+\_\+\+Request\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=187pt]{struct__MPIP__Request__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+enum Activation \mbox{\hyperlink{struct__MPIP__Request_adaf3b584c2f6a49124966e7a29e0f8a7}{state}}
+\item 
+enum P2\+P\+\_\+\+Side \mbox{\hyperlink{struct__MPIP__Request_aab96d2c9201ed9a2204af62223a73535}{side}}
+\item 
+bool $\ast$ \mbox{\hyperlink{struct__MPIP__Request_a44033cc6430027d627f7222a999906af}{local\+\_\+status}}
+\item 
+atomic\+\_\+int $\ast$ \mbox{\hyperlink{struct__MPIP__Request_a4928aa03e1a4ce0cf0d4085792cae09e}{internal\+\_\+status}}
+\item 
+bool $\ast$ \mbox{\hyperlink{struct__MPIP__Request_a5ac45f90710ba0ef6b6fb3e3a562e22d}{complete}}
+\item 
+int \mbox{\hyperlink{struct__MPIP__Request_a56b7d84417cd496ce56bda7a98c27470}{local\+\_\+parts}}
+\item 
+int \mbox{\hyperlink{struct__MPIP__Request_a4dfbd81afcf621f0fbf04e8800e18fea}{local\+\_\+size}}
+\item 
+int \mbox{\hyperlink{struct__MPIP__Request_a369db4bf108b25c7886a331ad58a88fa}{parts}}
+\item 
+int \mbox{\hyperlink{struct__MPIP__Request_afb7f89a84d9aac09c63417674946e224}{size}}
+\item 
+MPI\+\_\+\+Request $\ast$ \mbox{\hyperlink{struct__MPIP__Request_a9b352c9ff5f11d13722e8e6dc3157af1}{request}}
+\item 
+struct \mbox{\hyperlink{struct__meta__}{\+\_\+meta\+\_\+}} $\ast$ \mbox{\hyperlink{struct__MPIP__Request_ada1233a43f32b0036215a133b923722e}{comm\+\_\+data}}
+\item 
+pthread\+\_\+t \mbox{\hyperlink{struct__MPIP__Request_ad4a40686f81f876264d1197e676eefe0}{sync\+\_\+thread}}
+\item 
+pthread\+\_\+mutex\+\_\+t \mbox{\hyperlink{struct__MPIP__Request_a51aee620cfa16af60cc9410ebc301965}{lock}}
+\item 
+enum Thread\+\_\+\+Status \mbox{\hyperlink{struct__MPIP__Request_a8f4267c3fa1c09876e86894ec76052de}{threaded}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+the MPIP\+\_\+\+Request object used in a majority of the MPIPCL API calls Contains a an array of internal MPI\+\_\+\+Requests for tracking progress of partition transmission Note\+: local\+\_\+parts $\ast$ local\+\_\+size should equal parts$\ast$size 
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{struct__MPIP__Request_ada1233a43f32b0036215a133b923722e}\label{struct__MPIP__Request_ada1233a43f32b0036215a133b923722e}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!comm\_data@{comm\_data}}
+\index{comm\_data@{comm\_data}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{comm\_data}{comm\_data}}
+{\footnotesize\ttfamily struct \mbox{\hyperlink{struct__meta__}{\+\_\+meta\+\_\+}}$\ast$ \+\_\+\+MPIP\+\_\+\+Request\+::comm\+\_\+data}
+
+Struct of message data to setup internal requests away from Init function \mbox{\Hypertarget{struct__MPIP__Request_a5ac45f90710ba0ef6b6fb3e3a562e22d}\label{struct__MPIP__Request_a5ac45f90710ba0ef6b6fb3e3a562e22d}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!complete@{complete}}
+\index{complete@{complete}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{complete}{complete}}
+{\footnotesize\ttfamily bool$\ast$ \+\_\+\+MPIP\+\_\+\+Request\+::complete}
+
+Array of booleans representing the completion status of each partition. If the partition has been sent, then the status 1, else 0. Should be updated based on status of the related request inside MPIPCL\+\_\+\+Request \mbox{\Hypertarget{struct__MPIP__Request_a4928aa03e1a4ce0cf0d4085792cae09e}\label{struct__MPIP__Request_a4928aa03e1a4ce0cf0d4085792cae09e}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!internal\_status@{internal\_status}}
+\index{internal\_status@{internal\_status}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{internal\_status}{internal\_status}}
+{\footnotesize\ttfamily atomic\+\_\+int$\ast$ \+\_\+\+MPIP\+\_\+\+Request\+::internal\+\_\+status}
+
+Array of booleans representing the ready status of each internal partition. If the status is 1, then the partition is ready to be sent. A partition should only be marked as 1 if all external partitions it depends on are marked as ready. Type depends on the language used during compiliation atomic\+\_\+int$\ast$ is used for C compilers. Void$\ast$ is used for C++ compilers as atomic\+\_\+int is not defined in C++. \mbox{\Hypertarget{struct__MPIP__Request_a56b7d84417cd496ce56bda7a98c27470}\label{struct__MPIP__Request_a56b7d84417cd496ce56bda7a98c27470}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!local\_parts@{local\_parts}}
+\index{local\_parts@{local\_parts}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{local\_parts}{local\_parts}}
+{\footnotesize\ttfamily int \+\_\+\+MPIP\+\_\+\+Request\+::local\+\_\+parts}
+
+Number of externally viewed partitions. \mbox{\Hypertarget{struct__MPIP__Request_a4dfbd81afcf621f0fbf04e8800e18fea}\label{struct__MPIP__Request_a4dfbd81afcf621f0fbf04e8800e18fea}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!local\_size@{local\_size}}
+\index{local\_size@{local\_size}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{local\_size}{local\_size}}
+{\footnotesize\ttfamily int \+\_\+\+MPIP\+\_\+\+Request\+::local\+\_\+size}
+
+Number of elements in each externally viewed partition. \mbox{\Hypertarget{struct__MPIP__Request_a44033cc6430027d627f7222a999906af}\label{struct__MPIP__Request_a44033cc6430027d627f7222a999906af}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!local\_status@{local\_status}}
+\index{local\_status@{local\_status}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{local\_status}{local\_status}}
+{\footnotesize\ttfamily bool$\ast$ \+\_\+\+MPIP\+\_\+\+Request\+::local\+\_\+status}
+
+Array of booleans representing the ready status of each external partition. If the data is marked as ready be sent, then the status is 1 else 0. \mbox{\Hypertarget{struct__MPIP__Request_a51aee620cfa16af60cc9410ebc301965}\label{struct__MPIP__Request_a51aee620cfa16af60cc9410ebc301965}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!lock@{lock}}
+\index{lock@{lock}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{lock}{lock}}
+{\footnotesize\ttfamily pthread\+\_\+mutex\+\_\+t \+\_\+\+MPIP\+\_\+\+Request\+::lock}
+
+Mutex to handle access to background progress thread \mbox{\Hypertarget{struct__MPIP__Request_a369db4bf108b25c7886a331ad58a88fa}\label{struct__MPIP__Request_a369db4bf108b25c7886a331ad58a88fa}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!parts@{parts}}
+\index{parts@{parts}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{parts}{parts}}
+{\footnotesize\ttfamily int \+\_\+\+MPIP\+\_\+\+Request\+::parts}
+
+Number of internal partitions, each internal partition is sent as seperate internal send. ~\newline
+ \mbox{\Hypertarget{struct__MPIP__Request_a9b352c9ff5f11d13722e8e6dc3157af1}\label{struct__MPIP__Request_a9b352c9ff5f11d13722e8e6dc3157af1}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!request@{request}}
+\index{request@{request}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{request}{request}}
+{\footnotesize\ttfamily MPI\+\_\+\+Request$\ast$ \+\_\+\+MPIP\+\_\+\+Request\+::request}
+
+Array of internal requests, one request per internal partition. All internal requests must be complete for the MPIPCL\+\_\+\+Request to be considered complete. \mbox{\Hypertarget{struct__MPIP__Request_aab96d2c9201ed9a2204af62223a73535}\label{struct__MPIP__Request_aab96d2c9201ed9a2204af62223a73535}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!side@{side}}
+\index{side@{side}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{side}{side}}
+{\footnotesize\ttfamily enum P2\+P\+\_\+\+Side \+\_\+\+MPIP\+\_\+\+Request\+::side}
+
+Side of the communication the request is providing. 0=SENDER, 1=RECEIVER \mbox{\Hypertarget{struct__MPIP__Request_afb7f89a84d9aac09c63417674946e224}\label{struct__MPIP__Request_afb7f89a84d9aac09c63417674946e224}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!size@{size}}
+\index{size@{size}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{size}{size}}
+{\footnotesize\ttfamily int \+\_\+\+MPIP\+\_\+\+Request\+::size}
+
+The number of elements in each internal partition. ~\newline
+ \mbox{\Hypertarget{struct__MPIP__Request_adaf3b584c2f6a49124966e7a29e0f8a7}\label{struct__MPIP__Request_adaf3b584c2f6a49124966e7a29e0f8a7}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!state@{state}}
+\index{state@{state}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{state}{state}}
+{\footnotesize\ttfamily enum Activation \+\_\+\+MPIP\+\_\+\+Request\+::state}
+
+Activation state of the request, 0= INACTIVE, 1=ACTIVE \mbox{\Hypertarget{struct__MPIP__Request_ad4a40686f81f876264d1197e676eefe0}\label{struct__MPIP__Request_ad4a40686f81f876264d1197e676eefe0}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!sync\_thread@{sync\_thread}}
+\index{sync\_thread@{sync\_thread}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{sync\_thread}{sync\_thread}}
+{\footnotesize\ttfamily pthread\+\_\+t \+\_\+\+MPIP\+\_\+\+Request\+::sync\+\_\+thread}
+
+Handle to thread enabling background progress and non-\/blocking behavior of the init functions. No data will be transfered until the thread completes its setup and finishes. \mbox{\Hypertarget{struct__MPIP__Request_a8f4267c3fa1c09876e86894ec76052de}\label{struct__MPIP__Request_a8f4267c3fa1c09876e86894ec76052de}} 
+\index{\_MPIP\_Request@{\_MPIP\_Request}!threaded@{threaded}}
+\index{threaded@{threaded}!\_MPIP\_Request@{\_MPIP\_Request}}
+\doxysubsubsection{\texorpdfstring{threaded}{threaded}}
+{\footnotesize\ttfamily enum Thread\+\_\+\+Status \+\_\+\+MPIP\+\_\+\+Request\+::threaded}
+
+variable to check status of progress thread. -\/1 = no\+\_\+thread, 0 = thread\+\_\+exists, 1 = finished. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/mpipcl.\+h\end{DoxyCompactItemize}
