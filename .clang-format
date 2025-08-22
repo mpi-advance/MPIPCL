@@ -20,3 +20,10 @@ AlignConsecutiveAssignments: true
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
+
+BinPackArguments: false
+BinPackParameters: false
+
+ColumnLimit: 90
+
+InsertBraces: true

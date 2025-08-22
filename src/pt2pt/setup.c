@@ -5,8 +5,14 @@
 // calls functions in sync.c
 
 // fill in default values and bundle message data
-void prep(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype,
-          int opp, int tag, MPI_Comm comm, MPIP_Request* request)
+void prep(void* buf,
+          int partitions,
+          MPI_Count count,
+          MPI_Datatype datatype,
+          int opp,
+          int tag,
+          MPI_Comm comm,
+          MPIP_Request* request)
 {
     /* update partitioned request object with default values*/
     request->state       = INACTIVE;
@@ -16,8 +22,8 @@ void prep(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype,
     request->threaded    = NONE;
 
     /*create & set local status buffer*/
-    request->local_status = (bool*)malloc(
-        sizeof(bool) * partitions);  // >100 if external partition is ready
+    request->local_status =
+        (bool*)malloc(sizeof(bool) * partitions);  // >100 if external partition is ready
 
     /*set overall request lock*/
     int ret_val = pthread_mutex_init(&request->lock, NULL);
@@ -67,7 +73,9 @@ int sync_driver(MPI_Info info, MPIP_Request* request)
 
             int set = atoi(option);
             if (set <= 0)
+            {
                 set = 1;
+            }
             sync_hard(set, request);
         }
         else if (strcmp("SENDER", mode) == 0 || strcmp("RECEIVER", mode) == 0)
@@ -87,9 +95,8 @@ int sync_driver(MPI_Info info, MPIP_Request* request)
             // if not driver spawn progress thread
             if (request->side != driver)
             {
-                int t_res =
-                    pthread_create(&(request->sync_thread), NULL,
-                                   threaded_sync_driver, (void*)request);
+                int t_res = pthread_create(
+                    &(request->sync_thread), NULL, threaded_sync_driver, (void*)request);
                 assert(0 == t_res);
                 request->threaded = RUNNING;
                 return MPI_SUCCESS;
@@ -122,20 +129,20 @@ void internal_setup(MPIP_Request* request)
     MPI_Aint lb, extent, offset;
     meta* mes = request->comm_data;
 
-    request->request =
-        (MPI_Request*)malloc(request->parts * sizeof(MPI_Request));
-    assert(request->request != NULL);
-
     // get data_type from meta data.
     int ret_val = MPI_Type_get_extent(mes->type, &lb, &extent);
     assert(MPI_SUCCESS == ret_val);
 
+    // create internal request array
+    request->request = (MPI_Request*)malloc(request->parts * sizeof(MPI_Request));
+    assert(request->request != NULL);
+
     // create partition status arrays.
-    request->internal_status = (atomic_int*)malloc(
-        sizeof(atomic_int) *
-        request->parts);  // true if ready to send or received
-    request->complete = (bool*)malloc(
-        sizeof(bool) * request->parts);  // internal request has been started
+    request->internal_status = (atomic_int*)malloc(sizeof(atomic_int) * request->parts);
+    assert(request->internal_status != NULL);
+
+    request->complete = (bool*)malloc(sizeof(bool) * request->parts);
+    assert(request->complete != NULL);
 
     // for each allocated partition create a request based on side.
     for (int i = 0; i < request->parts; i++)
@@ -144,9 +151,13 @@ void internal_setup(MPIP_Request* request)
         offset = i * request->size * extent;
         if (request->side == SENDER)
         {
-            ret_val = MPI_Send_init((char*)mes->buff + offset, request->size,
-                                    mes->type, mes->partner, mes->tag + i,
-                                    mes->comm, &request->request[i]);
+            ret_val = MPI_Send_init((char*)mes->buff + offset,
+                                    request->size,
+                                    mes->type,
+                                    mes->partner,
+                                    mes->tag + i,
+                                    mes->comm,
+                                    &request->request[i]);
             assert(MPI_SUCCESS == ret_val);
             MPIPCL_DEBUG("Send_init called - buffer: %p - req pointer: %p\n",
                          (void*)((char*)mes->buff + offset),
@@ -154,9 +165,13 @@ void internal_setup(MPIP_Request* request)
         }
         else
         {
-            ret_val = MPI_Recv_init((char*)mes->buff + offset, request->size,
-                                    mes->type, mes->partner, mes->tag + i,
-                                    mes->comm, &request->request[i]);
+            ret_val = MPI_Recv_init((char*)mes->buff + offset,
+                                    request->size,
+                                    mes->type,
+                                    mes->partner,
+                                    mes->tag + i,
+                                    mes->comm,
+                                    &request->request[i]);
             assert(MPI_SUCCESS == ret_val);
             MPIPCL_DEBUG("Recv_init called - buffer: %p - req pointers: %p\n",
                          (void*)(void*)((char*)mes->buff + offset),
