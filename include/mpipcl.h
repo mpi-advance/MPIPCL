@@ -21,9 +21,9 @@ extern "C" {
 
 // structure to hold message settings if threaded sync is necessary
 /**
-* Structure to hold message settings if additional sycnchronization is necessary. 
-* Contains necessary information to set up a 2-sided communication channel. 
-*/
+ * Structure to hold message settings if additional sycnchronization is necessary.
+ * Contains necessary information to set up a 2-sided communication channel.
+ */
 typedef struct _meta_
 {
     void* buff;
@@ -51,39 +51,37 @@ enum Thread_Status
     FINISHED = 1
 };
 
-
 /**
-* the MPIP_Request object used in a majority of the MPIPCL API calls
-* Contains a an array of internal MPI_Requests for tracking progress of partition transmission
-* Note: local_parts * local_size should equal parts*size
-*/
+ * the MPIP_Request object used in a majority of the MPIPCL API calls
+ * Contains a an array of internal MPI_Requests for tracking progress of partition
+ * transmission Note: local_parts * local_size should equal parts*size
+ */
 
 typedef struct _MPIP_Request
 {
     /**
-	* Activation state of the request, 0= INACTIVE, 1=ACTIVE
-	*/
-	enum Activation state;
-	
-	/**
-	* Side of the communication the request is providing. 0=SENDER, 1=RECEIVER
-	*/
-    enum P2P_Side side;
-	
-    /**
-	* Array of booleans representing the ready status of each external partition. 
-	* If the data is marked as ready be sent, then the status is 1 else 0. 
-	*/
-	bool* local_status;  // status array - true if external partition is ready
+     * Activation state of the request, 0= INACTIVE, 1=ACTIVE
+     */
+    enum Activation state;
 
-	/**
-	* Array of booleans representing the ready status of each internal partition. 
-	* If the status is 1, then the partition is ready to be sent. A partition should only be marked as 1
-	* if all external partitions it depends on are marked as ready. 
-	* Type depends on the language used during compiliation
-	* atomic_int* is used for C compilers. 
-	* Void* is used for C++ compilers as atomic_int is not defined in C++. 
-	*/
+    /**
+     * Side of the communication the request is providing. 0=SENDER, 1=RECEIVER
+     */
+    enum P2P_Side side;
+
+    /**
+     * Array of booleans representing the ready status of each external partition.
+     * If the data is marked as ready be sent, then the status is 1 else 0.
+     */
+    bool* local_status;  // status array - true if external partition is ready
+
+    /**
+     * Array of booleans representing the ready status of each internal partition.
+     * If the status is 1, then the partition is ready to be sent. A partition should only
+     * be marked as 1 if all external partitions it depends on are marked as ready. Type
+     * depends on the language used during compiliation atomic_int* is used for C
+     * compilers. Void* is used for C++ compilers as atomic_int is not defined in C++.
+     */
 #ifdef __cplusplus
     void* internal_status;  // C++ can't use "atomic_int" from C, so let's just
                             // make it void *
@@ -91,56 +89,60 @@ typedef struct _MPIP_Request
     atomic_int* internal_status;  // status array - true if internal partition is ready
 #endif
 
-	/**
-	* Array of booleans representing the completion status of each  partition. 
-	* If the partition has been sent, then the status 1, else 0. 
-	* Should be updated based on status of the related request inside MPIPCL_Request
-	*/
+    /**
+     * Array of booleans representing the completion status of each  partition.
+     * If the partition has been sent, then the status 1, else 0.
+     * Should be updated based on status of the related request inside MPIPCL_Request
+     */
     bool* complete;  // status array - true if internal request has been started.
 
-	/**
-	* Number of externally viewed partitions. 
-	*/
+    /**
+     * Number of externally viewed partitions.
+     */
     int local_parts;  // number of partitions visible externally
-	
-	/**
-	* Number of elements in each externally viewed partition. 
-	*/
-    int local_size;   // number of items in each partitions
-	
-	/**
-	* Number of internal partitions, each internal partition is sent as seperate internal send.  
-	*/
-    int parts;             // number of internal requests to complete
-	
-	/**
-	* The number of elements in each internal partition.  
-	*/
-    int size;              // number of items in each internal request
-	
-	/**
-	* Array of internal requests, one request per internal partition. 
-	* All internal requests must be complete for the MPIPCL_Request to be considered complete. 
-	*/
+
+    /**
+     * Number of elements in each externally viewed partition.
+     */
+    int local_size;  // number of items in each partitions
+
+    /**
+     * Number of internal partitions, each internal partition is sent as seperate internal
+     * send.
+     */
+    int parts;  // number of internal requests to complete
+
+    /**
+     * The number of elements in each internal partition.
+     */
+    int size;  // number of items in each internal request
+
+    /**
+     * Array of internal requests, one request per internal partition.
+     * All internal requests must be complete for the MPIPCL_Request to be considered
+     * complete.
+     */
     MPI_Request* request;  // array of "size" internal requests to process
 
-	/**
-    * Struct of message data to setup internal requests away from Init function
-    */
-	struct _meta_* comm_data;
+    /**
+     * Struct of message data to setup internal requests away from Init function
+     */
+    struct _meta_* comm_data;
 
-	/**
-	* Handle to thread enabling background progress and non-blocking behavior of the init functions. 
-	* No data will be transfered until the thread completes its setup and finishes. 
-	*/
+    /**
+     * Handle to thread enabling background progress and non-blocking behavior of the init
+     * functions. No data will be transfered until the thread completes its setup and
+     * finishes.
+     */
     pthread_t sync_thread;
-	/**
-	* Mutex to handle access to background progress thread
-    */
-	pthread_mutex_t lock;
-	/**
-	* variable to check status of progress thread. -1 = no_thread, 0 = thread_exists, 1 = finished.
-	*/	
+    /**
+     * Mutex to handle access to background progress thread
+     */
+    pthread_mutex_t lock;
+    /**
+     * variable to check status of progress thread. -1 = no_thread, 0 = thread_exists, 1 =
+     * finished.
+     */
     enum Thread_Status threaded;
 } MPIP_Request;
 
