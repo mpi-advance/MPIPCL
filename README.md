@@ -70,7 +70,7 @@ These functions are simiply MPIPCL overrides of standard MPI functions. They sho
 - MPIP_Testsome(int incount, MPIPCL_REQUEST array_of_requests[],int* outcount, int array_of_indices[],MPI_Status array_of_statuses[])
 MPIP_Request_free(MPIP_REQUEST* request)
 ```
-### Partitioned API Prototypes
+### Partitioned API
 ```
 MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)```
     - Description: Setup internal requests and partitions
