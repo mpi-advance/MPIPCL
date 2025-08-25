@@ -79,7 +79,7 @@ typedef struct _MPIP_Request
      * Array of booleans representing the ready status of each internal partition.
      * If the status is 1, then the partition is ready to be sent. A partition should only
      * be marked as 1 if all external partitions it depends on are marked as ready. Type
-     * depends on the language used during compiliation atomic_int* is used for C
+     * depends on the language used during compilation atomic_int* is used for C
      * compilers. Void* is used for C++ compilers as atomic_int is not defined in C++.
      */
 #ifdef __cplusplus
@@ -107,7 +107,7 @@ typedef struct _MPIP_Request
     int local_size;  // number of items in each partitions
 
     /**
-     * Number of internal partitions, each internal partition is sent as seperate internal
+     * Number of internal partitions, each internal partition is sent as separate internal
      * send.
      */
     int parts;  // number of internal requests to complete
@@ -131,7 +131,7 @@ typedef struct _MPIP_Request
 
     /**
      * Handle to thread enabling background progress and non-blocking behavior of the init
-     * functions. No data will be transfered until the thread completes its setup and
+     * functions. No data will be transferred until the thread completes its setup and
      * finishes.
      */
     pthread_t sync_thread;

@@ -15,15 +15,14 @@ make
 ```
 
 ### Build Options
- - -DBUILD_DYNAMIC_LIBS (ON) : create a static library instead of a shared library
- - -DBUILD_EXAMPLES (OFF): Build some examples. Examples by default are in <build>/examples/BASIC
- - -DEXAMPLES_TO_BIN(OFF) : If building examples, place examples in <install_dir>/bin instead of in build directory 
+ - `-DBUILD_SHARED_LIBS` (ON) : Builds a shared library instead of a static library
+ - `-DBUILD_EXAMPLES` (OFF): Build some examples. Examples by default are in `<build>/examples/BASIC`
+ - `-DEXAMPLES_TO_BIN` (OFF) : If building examples, will also install examples to `<install_dir>/bin` in addition to `<build>/`
 
 ### Using the Library
-In order to use the library, you will need to make sure it is either included in the RPATH or the containing directory is added to LD_LIBRARY_PATH
-and you will need to include the supplied MPIPCL.h.  
+In order to use the library, you will need to make sure it is either included in RPATH or the containing directory is added to LD_LIBRARY_PATH and you will need to include the supplied MPIPCL.h at compilation.   
 
-# Basic Library Operation
+# Basic Library Operation. 
 The library requires a basic ordering of functions calls to work as designed. The init functions must be called before anyother function. These functions setup the internal channels for communication between the processes. This process occurs on a background thread and can prevent progress until completion, however the main thread may continue uninterrupted. 
 
 Then the generated requests must be activated with MPIP_Start. NO DATA is transfered at this stage. 
@@ -47,7 +46,7 @@ The reciever may start accepting data once the init and start functions are comp
 # MPIPCL API
 
 #### Partitioned Communication API
-```
+```c
 - MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
 - MPIP_Prev_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int src, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
 - MPIP_Pready(int partition, MPIPCL_REQUEST* request)
@@ -58,7 +57,7 @@ The reciever may start accepting data once the init and start functions are comp
 
 #### Modified MPI Functions 
 These functions are simiply MPIPCL overrides of standard MPI functions. They should be considered the same as their MPI counterparts with minimal functional alterations. 
-```
+```c
 - MPIP_Start(MPIPCL_REQUEST* request)
 - MPIP_Startall(int count, MPIPCL_REQUEST array_of_requests[])
 - MPIP_Wait(MPIPCL_REQUEST* request, MPI_Status* status)
@@ -73,7 +72,7 @@ MPIP_Request_free(MPIP_REQUEST* request)
 ```
 ### Partitioned API Prototypes
 ```
-- MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
+MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)```
     - Description: Setup internal requests and partitions
     - Inputs
         - void* buf             // Buffer containing data from all partitions
@@ -86,8 +85,8 @@ MPIP_Request_free(MPIP_REQUEST* request)
         - MPI_Info info         // additional information to be used (see Doxygen page*)
     - Outputs
         - MPIPCL_REQUEST* request 
-
-- MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
+```
+- MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)```
     - Description: Setup internal requests for recieving partitions 
     - Inputs
         - void* buf: Buffer containing data
@@ -101,16 +100,18 @@ MPIP_Request_free(MPIP_REQUEST* request)
     - Outputs
         - MPIPCL_REQUEST* request created 
 
-
+```
 - MPIP_Pready(int partition, MPIPCL_REQUEST* request)
+```
     - Description: Mark the supplied partition as ready for transfer. 
     The partition should not be modified after being marked. 
     - Inputs: 
         int partition: id of the partition to be marked
         MPIPCL_REQUEST* request: request containing the partition to be marked.        
     - Outputs
-
+```
 - MPIP_Pready_range(int partition_low, int partition_high, MPIPCL_REQUEST* request)
+```
   - Description: Mark the partitions with ids between partition_low and partition_high (inclusive) as ready to send. . 
     The partitions should not be modified after being marked. 
     - Inputs: 
@@ -118,8 +119,9 @@ MPIP_Request_free(MPIP_REQUEST* request)
         MPIPCL_REQUEST* request: request containing the partition to be marked.        
     - Outputs
 
-
+```
 - MPIP_Pready_list(int length, int array_of_partitions[], MPIPCL_REQUEST* request)
+```
   - Description: Mark the partitions with ids listed in the array_of_partitions as ready to send.
 
     The partitions should not be modified after being marked. 
@@ -130,15 +132,15 @@ MPIP_Request_free(MPIP_REQUEST* request)
         MPIPCL_REQUEST* request: request containing the partition to be marked.        
     - Outputs
 
-
+```
 - MPIP_Parrived(MPIPCL_REQUEST* request, int partition, int* flag)
-    
+``` 
     - Inputs: 
         MPIPCL_REQUEST* request: request containing the partition to be marked.
         int partition: id of the partition to be checked
     - Output:
         - flag: returned TRUE if the partition has arrived, False otherwise. 
-```
+
 #### Classes and Structs
 Information about classes and structs may be accessed by using Doxygen with the supplied .DoxyFile
 
