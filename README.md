@@ -47,17 +47,18 @@ The reciever may start accepting data once the init and start functions are comp
 # MPIPCL API
 
 #### Partitioned Communication API
-'''
+```
 - MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
 - MPIP_Prev_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int src, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
 - MPIP_Pready(int partition, MPIPCL_REQUEST* request)
 - MPIP_Pready_range(int partition_low, int partition_high, MPIPCL_REQUEST* request)
 - MPIP_Pready_list(int length, int array_of_partitions[], MPIPCL_REQUEST* request)
 - MPIP_Parrived(MPIPCL_REQUEST* request, int partition, int* flag)
-'''
+```
 
 #### Modified MPI Functions 
 These functions are simiply MPIPCL overrides of standard MPI functions. They should be considered the same as their MPI counterparts with minimal functional alterations. 
+```
 - MPIP_Start(MPIPCL_REQUEST* request)
 - MPIP_Startall(int count, MPIPCL_REQUEST array_of_requests[])
 - MPIP_Wait(MPIPCL_REQUEST* request, MPI_Status* status)
@@ -69,8 +70,9 @@ These functions are simiply MPIPCL overrides of standard MPI functions. They sho
 - MPIP_Testany(int count, MPIPCL_REQUEST array_of_requests[], int* index,int* flag, MPI_Status* status
 - MPIP_Testsome(int incount, MPIPCL_REQUEST array_of_requests[],int* outcount, int array_of_indices[],MPI_Status array_of_statuses[])
 MPIP_Request_free(MPIP_REQUEST* request)
-
+```
 ### Partitioned API
+```
 - MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
     - Description: Setup internal requests and partitions
     - Inputs
@@ -136,9 +138,9 @@ MPIP_Request_free(MPIP_REQUEST* request)
         int partition: id of the partition to be checked
     - Output:
         - flag: returned TRUE if the partition has arrived, False otherwise. 
-
+```
 #### Classes and Structs
-Information about classes and structs may be accessed by using Doxygen with the supplied DoxyFile
+Information about classes and structs may be accessed by using Doxygen with the supplied .DoxyFile
 
 
 ### Acknowlegments
