@@ -71,21 +71,21 @@ These functions are simiply MPIPCL overrides of standard MPI functions. They sho
 - MPIP_Testsome(int incount, MPIPCL_REQUEST array_of_requests[],int* outcount, int array_of_indices[],MPI_Status array_of_statuses[])
 MPIP_Request_free(MPIP_REQUEST* request)
 ```
-### Partitioned API
+### Partitioned API Prototypes
 ```
 - MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
     - Description: Setup internal requests and partitions
     - Inputs
-        - void* buf: Buffer containing data
-        - int partitions: Number of partitions to divide the buffer between
-        - MPI_Count count: Number of 
-        - MPI_Datatype datatype: the datatype of the information to be received
-        - int src: The rank the partitions originate. 
-        - int tag:  A tag for the request
-        - MPI_Comm comm: The communicator to be used. 
-        - MPI_Info info: additional information to be used (see Doxygen page*)
+        - void* buf             // Buffer containing data from all partitions
+        - int partitions        // Number of partitions to divide the buffer between
+        - MPI_Count count       // Number of 
+        - MPI_Datatype datatype // the datatype of the information to be received
+        - int src               // The rank from which the partitions originate. 
+        - int tag               //  A tag for the request
+        - MPI_Comm comm         // The communicator to be used. 
+        - MPI_Info info         // additional information to be used (see Doxygen page*)
     - Outputs
-        - MPIPCL_REQUEST* request created
+        - MPIPCL_REQUEST* request 
 
 - MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
     - Description: Setup internal requests for recieving partitions 
