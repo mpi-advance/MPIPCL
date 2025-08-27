@@ -4,6 +4,12 @@
 
 // call send function on all marked partitions
 // catchup function for sync thread.
+/**
+	* @brief calls general send on all partitions that have been marked as ready in the supplied request. 
+	
+	* @param [in]request
+*/
+
 void send_ready(MPIP_Request* request)
 {
     // call send on each currently marked partition

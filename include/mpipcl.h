@@ -1,3 +1,11 @@
+/**
+* @file mpipcl.h
+*
+* This file contains the definitions for the MPIP_Request object, 
+* as well as the Partitioned Communication API, and
+* supporting functions
+*/
+
 /* Prototype and definitions related to partitioned communication APIs */
 #ifndef __MPIPCL__
 #define __MPIPCL__
@@ -34,16 +42,34 @@ typedef struct _meta_
 } meta;
 
 // enums for MPIP request attributes
+/** 
+	Allowed values for stating which side 
+	of the communication the MPIP request 
+	is monitoring. 
+	0=SENDER, 1=RECEIVER
+*/
 enum P2P_Side
 {
     SENDER   = 0,
     RECEIVER = 1
 };
+
+/**
+  Allowed states of the MPIP_request
+  0= INACTIVE, 1=ACTIVE
+*/
 enum Activation
 {
     INACTIVE = 0,
     ACTIVE   = 1
 };
+
+/**
+	Status of internal progress thread for asynchronous setup
+	-1 = no_thread, 
+	0 = thread_exists, 1 =
+     * finished.
+*/
 enum Thread_Status
 {
     NONE     = -1,
@@ -52,32 +78,27 @@ enum Thread_Status
 };
 
 /**
+\class _MPIP_Request
  * the MPIP_Request object used in a majority of the MPIPCL API calls
  * Contains a an array of internal MPI_Requests for tracking progress of partition
  * transmission Note: local_parts * local_size should equal parts*size
  */
-
 typedef struct _MPIP_Request
 {
-    /**
-     * Activation state of the request, 0= INACTIVE, 1=ACTIVE
-     */
-    enum Activation state;
 
-    /**
-     * Side of the communication the request is providing. 0=SENDER, 1=RECEIVER
-     */
-    enum P2P_Side side;
+    enum Activation state;     //!< Activation state of the request.
 
-    /**
+    enum P2P_Side side;        //!< Side of the communication the request is providing.
+
+    /** @brief
      * Array of booleans representing the ready status of each external partition.
      * If the data is marked as ready be sent, then the status is 1 else 0.
      */
-    bool* local_status;  // status array - true if external partition is ready
+    bool* local_status;  //! status array - true if external partition is ready
 
-    /**
-     * Array of booleans representing the ready status of each internal partition.
-     * If the status is 1, then the partition is ready to be sent. A partition should only
+    /**	@brief
+     * Array of booleans representing the ready status of each internal message.
+     * If the status is 1, then the partition is ready to be sent. A internal message should only
      * be marked as 1 if all external partitions it depends on are marked as ready. Type
      * depends on the language used during compilation atomic_int* is used for C
      * compilers. Void* is used for C++ compilers as atomic_int is not defined in C++.
@@ -89,35 +110,22 @@ typedef struct _MPIP_Request
     atomic_int* internal_status;  // status array - true if internal partition is ready
 #endif
 
-    /**
-     * Array of booleans representing the completion status of each  partition.
-     * If the partition has been sent, then the status 1, else 0.
-     * Should be updated based on status of the related request inside MPIPCL_Request
+    /** @brief
+     * Booleans representing the completion status of the overall request
+     * If complete then value = 1, else 0.
+     * Should only be 1 if all internal messages have been complete, e.g. internal status is all 1's 
      */
     bool* complete;  // status array - true if internal request has been started.
 
-    /**
-     * Number of externally viewed partitions.
-     */
-    int local_parts;  // number of partitions visible externally
+    int local_parts;  //!< number of partitions visible externally
 
-    /**
-     * Number of elements in each externally viewed partition.
-     */
-    int local_size;  // number of items in each partitions
+    int local_size;  //!< number of items in each partitions
 
-    /**
-     * Number of internal partitions, each internal partition is sent as separate internal
-     * send.
-     */
-    int parts;  // number of internal requests to complete
+    int parts;  //!< number of internal requests to complete
 
-    /**
-     * The number of elements in each internal partition.
-     */
-    int size;  // number of items in each internal request
+    int size;  //!< number of items in each internal request
 
-    /**
+    /** @brief
      * Array of internal requests, one request per internal partition.
      * All internal requests must be complete for the MPIPCL_Request to be considered
      * complete.
@@ -129,25 +137,36 @@ typedef struct _MPIP_Request
      */
     struct _meta_* comm_data;
 
-    /**
-     * Handle to thread enabling background progress and non-blocking behavior of the init
+    /** @brief
+     * Handle to thread enabling background progress and non-blocking behavior of the MPIP_init
      * functions. No data will be transferred until the thread completes its setup and
      * finishes.
      */
     pthread_t sync_thread;
-    /**
-     * Mutex to handle access to background progress thread
-     */
-    pthread_mutex_t lock;
-    /**
-     * variable to check status of progress thread. -1 = no_thread, 0 = thread_exists, 1 =
-     * finished.
-     */
-    enum Thread_Status threaded;
+    pthread_mutex_t lock; //!< Mutex to handle access to background progress thread
+    enum Thread_Status threaded; //!< Variable to monitor status of progress thread.
 } MPIP_Request;
 
-//----------------------------------------------------------------------------------------------
 
+ /**
+ *  @defgroup user_api Partitioned Communication API
+ *  User available Partitioned Communication API made available by the library. 
+ * 
+ */
+
+//----------------------------------------------------------------------------------------------
+/** @brief This function takes information about the starting buffer, external partitions, and communication target and populates the supplied MPIP_Request object with information necessary for it to setup the send side of the communication channel. Behavior of the internal setups including the number of internal messages is controlled through the MPI_Info object.  
+* @ingroup user_api
+*@param [in]  buf        The memory buffer where all the partitions are. The buffer is required to be contiguous. 
+*@param [in]  partitions The number of externally facing partitions that \p buf will be seperated into.  
+*@param [in]  count      The number of elements inside \p buf
+*@param [in]  datatype   The datatype of each element inside buf
+*@param [in]  dest       The rank of the process to receive the messages
+*@param [in]  tag        Integer tag to be used by the request, the request will use the provided value as well as incremented values equal to the requested number of internal messages. 
+*@param [in]  comm       MPI_communicator to be used for the messages.  
+*@param [in]  info       MPI_info object used to define the internal behavior of the request object. 
+*@param [out] request pointer to MPIP_request object to be populated.  
+*/
 int MPIP_Psend_init(void* buf,
                     int partitions,
                     MPI_Count count,
@@ -158,6 +177,18 @@ int MPIP_Psend_init(void* buf,
                     MPI_Info info,
                     MPIP_Request* request);
 
+/** @brief This function takes information about the starting buffer, external partitions, and communication target and populates the supplied MPIP_Request object with information necessary for it to setup the reciever side of the communication channel. Behavior of the internal setups including the number of internal messages is controlled through the MPI_Info object.  
+* @ingroup user_api
+*@param [in]  buf        The memory buffer where all the partitions are. The buffer is required to be contiguous. 
+*@param [in]  partitions The number of externally facing partitions that \p buf will be seperated into.  
+*@param [in]  count      The number of elements inside \p buf
+*@param [in]  datatype   The datatype of each element inside buf
+*@param [in]  dest       The rank of the process to receive the messages
+*@param [in]  tag        Integer tag to be used by the request, the request will use the provided value as well as incremented values equal to the requested number of internal messages. 
+*@param [in]  comm       MPI_communicator to be used for the messages.  
+*@param [in]  info       MPI_info object used to define the internal behavior of the request object. 
+*@param [out] request    pointer to MPIP_request object to be populated
+*/
 int MPIP_Precv_init(void* buf,
                     int partitions,
                     MPI_Count count,
@@ -168,13 +199,51 @@ int MPIP_Precv_init(void* buf,
                     MPI_Info info,
                     MPIP_Request* request);
 
+
+/** @brief This function marks the partition with the given id on the supplied request as ready to send. Can only be called by sending process when the request is active. If the channel has finished setting up, the function will call general_send() in an attempt to transfer as soon as possible. 
+* @ingroup user_api
+*@param [in]  void* buf The memory buffer where all the partitions are. The buffer is required to be contiguous. 
+*@param [in]  int partitions the number of externally facing partitions inside of buf. 
+*@param [in]  MPI_Count count The number of elements inside buf
+*@param [in]  MPI_Datatype datatype, The datatype of each element inside buf
+*@param [in]  int src,   The rank of the process to receive the transfer. 
+*@param [in]  int tag,    The base tag to be used by the requests, the request will use the provided tag as well as incremented tags equal to the requested number of internal messages. 
+*@param [in]  MPI_Comm comm, The MPI_communicator context to be used by the request. 
+*@param [in]  MPI_Info info MPI_info object used to define the internal behavior of the request object. 
+*@param [in, out] MPIP_Request* request request object to be populated. 
+*/
 int MPIP_Pready(int partition, MPIP_Request* request);
 
+/** @brief This function marks the partitions with the given ids between partition_low and partition_high inclusive. The function works by calling MPIP_Pready on each partition, including invoking general_send() after each successful mark. Can only be called by sending process when the request is active. 
+* @ingroup user_api
+
+*@param [in]  partition_low  the id of the first partition to mark as ready (inclusive)
+*@param [in]  partition_high the id of the highest partition to mark as ready (inclusive)
+*@param [in, out] MPIP_Request* request request object to be populated. 
+*/
 int MPIP_Pready_range(int partition_low, int partition_high, MPIP_Request* request);
 
+/** @brief This function marks the partitions with ids listed in array_of_partitions as ready. The function works by calling MPIP_Pready on each partition matching the supplied id, including invoking general_send() after each successful mark. Can only be called by sending process when the request is active. 
+* @ingroup user_api
+
+*@param [in]  length the number of partition ids included in \p array_of_partitions
+*@param [in]  array_of_partitions An array of partition ids to be marked as ready. 
+*@param [in, out] MPIP_Request* request request object to be populated. 
+*/
 int MPIP_Pready_list(int length, int array_of_partitions[], MPIP_Request* request);
 
+/** @brief This function checks to see if a partition has been sent.
+* @ingroup user_api 
+*@param [in]  MPIP_Request* The request containing the partition to be checked.
+*@param [in]  int partition The id of the partition to be checked. 
+*@param [out] flag   the result of the check, 1 if the partition has arrived and is ready to be used, 0 otherwise. 
+*/
 int MPIP_Parrived(MPIP_Request* request, int partition, int* flag);
+
+ /**
+ *  @defgroup mpi_mod Modified MPI functions. 
+ *  Overrides of necessary MPI Calls to work with the new request object. Should be considered and used the same as their unmodified counterparts with minimal changes to work with the MPIP_Request object. 
+ */
 
 int MPIP_Start(MPIP_Request* request);
 int MPIP_Startall(int count, MPIP_Request array_of_requests[]);
@@ -211,6 +280,27 @@ int MPIP_Testsome(int incount,
 
 int MPIP_Request_free(MPIP_Request* request);
 
+/** \defgroup internal Internal Functions
+	* These functions are not used by the Partitioned API calls, but are not meant to be invoked directly. 
+*/
+
+/** \defgroup setup Internal setup functions
+	@ingroup internal  
+	* These functions are called during the MPIP_Init functions to setup the internal communication channels. The functions are implemented in setup.c
+	@{
+*/
+
+/** @brief This function takes information about the starting buffer, external partitions, and communication target and populates the supplied MPIP_Request object. 
+
+*@param [in]  void* buf,
+*@param [in]  int partitions,
+*@param [in]  MPI_Count count,          The 
+*@param [in]  MPI_Datatype datatype,    The datatype of the 
+*@param [in]  int opp,                  The rank of the remote process. 
+*@param [in]  int tag,                  An integer tag to be used with matching messages 
+*@param [in]  MPI_Comm comm             MPI Communictor context. 
+*@param [in, out] MPIP_Request* request Pointer to the request being initialized
+*/
 // functions current defined outside of mpipcl
 // setup.c
 void prep(void* buf,
@@ -221,14 +311,35 @@ void prep(void* buf,
           int tag,
           MPI_Comm comm,
           MPIP_Request* request);
+		  	  
 int sync_driver(MPI_Info info, MPIP_Request* request);
-void internal_setup(MPIP_Request* request);
+void internal_setup(_MPIP_Request* request);
+
+/**
+	*Reset the ready status of all external partitions in the supplied request to Not Ready (0)
+	*The contents of the /reflocal_status
+*/
 void reset_status(MPIP_Request* request);
 
+/** @} */
+
+
+/** \defgroup sync synchronization functions
+	@ingroup internal  
+	* These functions are called during the MPIP_Init functions and run in the background to complete the creation of the internal messages. These functions are implemented in sync.c
+	@{
+*/
 // sync.c
 void sync_hard(int option, MPIP_Request* request);
 void sync_side(enum P2P_Side driver, MPIP_Request* request);
 void* threaded_sync_driver(void* args);
+/** @} */
+
+/** \defgroup sends Internal Messaging Functions
+	* @ingroup internal 
+	* These functions map the internal partitions to internal messages and back and send internal messages which are not waiting in non-marked partitions. 
+	@{
+*/
 
 // send.c
 // send functions
@@ -236,7 +347,17 @@ void send_ready(MPIP_Request* request);
 void general_send(int id, MPIP_Request* request);
 
 // remap functions
+/**
+	* Function to map between external partitions and internal messages on the receiver
+	* Inputs:
+	*	id     : external partition to be checked. 
+	*	request: MPIP_Request object containing the partition to be checked. 
+	* Output: 
+	*	Returns True if all internal messages necessary for construction of the partition are recieved.
+	*   Returns False otherwise. 
+*/
 int map_recv_buffer(int id, MPIP_Request* request);
+/** @} */
 
 // debug functions
 #if defined(WITH_DEBUG)
