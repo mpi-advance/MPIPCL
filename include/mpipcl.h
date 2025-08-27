@@ -1,6 +1,9 @@
 /**
 * @file mpipcl.h
-*
+* @file setup.c
+* @file send.c
+* @file sync.c
+* @file mpipcl.c
 * This file contains the definitions for the MPIP_Request object, 
 * as well as the Partitioned Communication API, and
 * supporting functions
@@ -166,6 +169,7 @@ typedef struct _MPIP_Request
 *@param [in]  comm       MPI_communicator to be used for the messages.  
 *@param [in]  info       MPI_info object used to define the internal behavior of the request object. 
 *@param [out] request pointer to MPIP_request object to be populated.  
+\callergraph
 */
 int MPIP_Psend_init(void* buf,
                     int partitions,
@@ -311,13 +315,31 @@ void prep(void* buf,
           int tag,
           MPI_Comm comm,
           MPIP_Request* request);
-		  	  
+
+/** @brief This function calls a sychronization function based on the information provided by the supplied MPI_Info object. 
+  * The functions behavior is determined by the PNUM and SET values of the MPI_INFO object. \n
+  * If MPI_INFO:PMODE = "HARD" then hard_sync is called. \n
+  * If MPI_INFO:PMODE = "RECEIVER" or "SENDER" then a thread is started to complete the build process and queue work to be done after setup is complete. \n
+  * If no object is supplied, the function creates a Hard sync with a single message. \n
+  
+*@param [in]  info MPI_Info object 
+*@param [in, out] request Pointer to the request being initialized
+*/ 	  
 int sync_driver(MPI_Info info, MPIP_Request* request);
+
+/** @brief Completes the creation of the internal message channels after the final number of messages and partitions are determined. 
+*@param [in, out] request Pointer to the request being initialized
+*/
 void internal_setup(_MPIP_Request* request);
 
 /**
 	*Reset the ready status of all external partitions in the supplied request to Not Ready (0)
 	*The contents of the /reflocal_status
+*/
+
+
+/** @brief Resets the completion and ready status of all partitions and internal messages to unmarked and uncompleted, respectfully. 
+*@param [in, out] request Pointer to the request being initialized
 */
 void reset_status(MPIP_Request* request);
 
