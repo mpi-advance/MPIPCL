@@ -1,4 +1,4 @@
-# Quick summary
+# Overview
 Library implementation of MPI-4 Partitioned Communication (currently using persistent point-to-point communication).
 
 Partitioned Communication is the breaking of a single buffer of data into smaller chunks(partitions) that can be prepared and sent independent of each other. Each partition can be safely modified and sent by a individual thread. 
