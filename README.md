@@ -8,7 +8,7 @@ This is a component of the MPI-Advance Project!
 # Building Instructions
 ### Prequisites
 - MPI package (supporting MPI 3.0 or later)
-- Cmake 3.17
+- CMake 3.17
 
 ### Building the Library
 The MPIPCL library is a fairly simple cmake build:
