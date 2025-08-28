@@ -303,7 +303,7 @@ int MPIP_Request_free(MPIP_Request* request);
 *@param [in]  MPI_Datatype datatype,    The datatype of the 
 *@param [in]  int opp,                  The rank of the remote process. 
 *@param [in]  int tag,                  An integer tag to be used with matching messages 
-*@param [in]  MPI_Comm comm             MPI Communictor context. 
+*@param [in]  MPI_Comm comm             MPI Communicator context. 
 *@param [in, out] MPIP_Request* request Pointer to the request being initialized
 */
 void prep(void* buf,
