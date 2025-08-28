@@ -366,7 +366,7 @@ void sync_side(enum P2P_Side driver, MPIP_Request* request);
 
 /** @brief This function is run by the background thread, the process captures the information from the driving process. After setting up the request \n
 *          the function triggers functionality depending on which side is running the thread. 
-*		   Reciever: if the request is active, it starts all the internal requests 
+*		   Receiver: if the request is active, it starts all the internal requests 
 *          Sender:  if the request is active attempt to send all partitions marked as ready.
 *          The argument list only contains the MPIP_Request object being modified.  
 *@param [in, out] request Pointer to the request being initialized
