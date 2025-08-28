@@ -11,7 +11,7 @@ This is a component of the MPI-Advance Project!
 - CMake 3.17
 
 ### Building the Library
-The MPIPCL library is a fairly simple cmake build:
+The MPIPCL library is a fairly simple CMake build:
 ```
 mkdir <build_dir>
 cd <build_dir>
