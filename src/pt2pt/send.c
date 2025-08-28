@@ -21,7 +21,7 @@ void send_ready(MPIP_Request* request)
 
 
 /** 
-	*@brief This function maps between an external partition to which internal messages are incharge of transmitting the data 
+	*@brief This function maps between an external partition to which internal messages are in charge of transmitting the data 
 	*@param [in] user_partition_id
 	*@param [in] request
 	*@param [out] start
