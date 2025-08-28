@@ -315,7 +315,7 @@ void prep(void* buf,
           MPI_Comm comm,
           MPIP_Request* request);
 
-/** @brief This function calls a sychronization function based on the information provided by the supplied MPI_Info object. Depending on the options a thread may be spawned to maintain non-blocking behavior of the main thread. 
+/** @brief This function calls a synchronization function based on the information provided by the supplied MPI_Info object. Depending on the options a thread may be spawned to maintain non-blocking behavior of the main thread. 
   * The functions behavior is determined by the PNUM and SET values of the MPI_INFO object. \n
   * If MPI_INFO:PMODE = "HARD" then hard_sync is called. \n
   * If MPI_INFO:PMODE = "RECEIVER" or "SENDER" then a thread is started to complete the build process and queue work to be done after setup is complete. \n
