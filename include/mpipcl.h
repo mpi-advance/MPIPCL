@@ -394,7 +394,7 @@ void send_ready(MPIP_Request* request);
 void general_send(int id, MPIP_Request* request);
 
 // remap functions
-/** @brief This function maps which internal messages are necessary for a external partition on the reciever to have completely arrived and returns 1 if the partition is complete or 0 otherwise. 
+/** @brief This function maps which internal messages are necessary for a external partition on the receiver to have completely arrived and returns 1 if the partition is complete or 0 otherwise. 
 	* Function to map between external partitions and internal messages on the receiver. Invoked as part of MPIP_Parrived. 
 	*@param [in] id The partition to be checked. 
 	*@param [in, out] request the request containing the partition, updates local flag with result. 
