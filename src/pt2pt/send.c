@@ -1,14 +1,11 @@
+/**
+* @file send.c
+*/
+
 #include <math.h>
 
 #include "mpipcl.h"
 
-// call send function on all marked partitions
-// catchup function for sync thread.
-/**
-	* @brief calls general send on all partitions that have been marked as ready in the supplied request. 
-	
-	* @param [in]request
-*/
 
 void send_ready(MPIP_Request* request)
 {
@@ -22,6 +19,15 @@ void send_ready(MPIP_Request* request)
     }
 }
 
+
+/** 
+	*@brief This function maps between an external partition to which internal messages are incharge of transmitting the data 
+	*@param [in] user_partition_id
+	*@param [in] request
+	*@param [out] start
+	*@param [out] end
+	*@param [in, out] request the request containing the partition, updates local flag with result.  
+	*/
 static inline void map_local_to_network_partitions(int user_partition_id,
                                                    MPIP_Request* request,
                                                    int* start,

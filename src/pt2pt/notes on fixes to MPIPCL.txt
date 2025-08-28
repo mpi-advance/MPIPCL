@@ -1,0 +1,2 @@
+Duplicate line with mutex setup
+MPI_Send in sync.c line 26

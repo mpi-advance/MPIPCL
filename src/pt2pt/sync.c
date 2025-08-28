@@ -1,3 +1,7 @@
+/**
+* @file sync.c
+*/
+
 #include "mpipcl.h"
 // implemented synchronization modes
 

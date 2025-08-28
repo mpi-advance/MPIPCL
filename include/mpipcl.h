@@ -203,7 +203,6 @@ int MPIP_Precv_init(void* buf,
                     MPI_Info info,
                     MPIP_Request* request);
 
-
 /** @brief This function marks the partition with the given id on the supplied request as ready to send. Can only be called by sending process when the request is active. If the channel has finished setting up, the function will call general_send() in an attempt to transfer as soon as possible. 
 * @ingroup user_api
 *@param [in]  void* buf The memory buffer where all the partitions are. The buffer is required to be contiguous. 
@@ -296,6 +295,8 @@ int MPIP_Request_free(MPIP_Request* request);
 
 /** @brief This function takes information about the starting buffer, external partitions, and communication target and populates the supplied MPIP_Request object. 
 
+// functions current defined outside of mpipcl
+// setup.c
 *@param [in]  void* buf,
 *@param [in]  int partitions,
 *@param [in]  MPI_Count count,          The 
@@ -305,8 +306,6 @@ int MPIP_Request_free(MPIP_Request* request);
 *@param [in]  MPI_Comm comm             MPI Communictor context. 
 *@param [in, out] MPIP_Request* request Pointer to the request being initialized
 */
-// functions current defined outside of mpipcl
-// setup.c
 void prep(void* buf,
           int partitions,
           MPI_Count count,
@@ -316,7 +315,7 @@ void prep(void* buf,
           MPI_Comm comm,
           MPIP_Request* request);
 
-/** @brief This function calls a sychronization function based on the information provided by the supplied MPI_Info object. 
+/** @brief This function calls a sychronization function based on the information provided by the supplied MPI_Info object. Depending on the options a thread may be spawned to maintain non-blocking behavior of the main thread. 
   * The functions behavior is determined by the PNUM and SET values of the MPI_INFO object. \n
   * If MPI_INFO:PMODE = "HARD" then hard_sync is called. \n
   * If MPI_INFO:PMODE = "RECEIVER" or "SENDER" then a thread is started to complete the build process and queue work to be done after setup is complete. \n
@@ -352,8 +351,26 @@ void reset_status(MPIP_Request* request);
 	@{
 */
 // sync.c
+
+/** @brief This functions sets the number of internal creates to a static value determined by option.
+*@param [in] option The number of internal messages to create.
+*@param [in, out] request Pointer to the request being initialized
+*/
 void sync_hard(int option, MPIP_Request* request);
+
+/** @brief This function allows one side of the communication to determine the number of internal messages. The driving side sends the information to the opposite side. 
+*@param [in] driver, which side of the communication is in charge of determining how many internal messages to generate. 
+*@param [in, out] request Pointer to the request being initialized
+*/
 void sync_side(enum P2P_Side driver, MPIP_Request* request);
+
+/** @brief This function is run by the background thread, the process captures the information from the driving process. After setting up the request \n
+*          the function triggers functionality depending on which side is running the thread. 
+*		   Reciever: if the request is active, it starts all the internal requests 
+*          Sender:  if the request is active attempt to send all partitions marked as ready.
+*          The argument list only contains the MPIP_Request object being modified.  
+*@param [in, out] request Pointer to the request being initialized
+*/
 void* threaded_sync_driver(void* args);
 /** @} */
 
@@ -365,18 +382,23 @@ void* threaded_sync_driver(void* args);
 
 // send.c
 // send functions
+
+/** @brief This function is run by the background thread, and attempts to send all partitions that have been marked as ready. 
+*@param [in, out] request Pointer to the request being initialized
+*/
 void send_ready(MPIP_Request* request);
+
+/** @brief This function is run by the background thread, and attempts to send all partitions that have been marked as ready. 
+*@param [in, out] request Pointer to the request being initialized
+*/
 void general_send(int id, MPIP_Request* request);
 
 // remap functions
-/**
-	* Function to map between external partitions and internal messages on the receiver
-	* Inputs:
-	*	id     : external partition to be checked. 
-	*	request: MPIP_Request object containing the partition to be checked. 
-	* Output: 
-	*	Returns True if all internal messages necessary for construction of the partition are recieved.
-	*   Returns False otherwise. 
+/** @brief This function maps which internal messages are necessary for a external partition on the reciever to have completely arrived and returns 1 if the partition is complete or 0 otherwise. 
+	* Function to map between external partitions and internal messages on the receiver. Invoked as part of MPIP_Parrived. 
+	*@param [in] id The partition to be checked. 
+	*@param [in, out] request the request containing the partition, updates local flag with result. 
+	*@return 1 if partition has arrived, else 0. 
 */
 int map_recv_buffer(int id, MPIP_Request* request);
 /** @} */
