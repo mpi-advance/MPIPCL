@@ -71,7 +71,7 @@ enum Activation
 enum Thread_Status
 {
     NONE     = -1, //!< The thread does not exist or 
-    RUNNING  = 0,  //!< The thread has been created and is running setup tasks in the background
+    RUNNING  = 0,  //!< The thread has been created and is running setup tasks 
     FINISHED = 1   //!< The thread has completed the setup and has terminated. 
 };
 
@@ -256,7 +256,7 @@ int MPIP_Pready_range(int partition_low, int partition_high, MPIP_Request* reque
 /** @brief 
  * This function marks the partitions with ids listed in array_of_partitions 
  * as ready. The function works by calling MPIP_Pready on each partition
- * matching the supplied id, including invoking general_send() after each successful mark. 
+ * matching the supplied id, including invoking general_send() after marking each. 
  * Can only be called by sending process when the request is active. 
  * @ingroup user_api
  * @param [in]  length the number of partition ids included in \p array_of_partitions
@@ -340,7 +340,7 @@ int MPIP_Request_free(MPIP_Request* request);
  * This function takes information about the starting buffer, 
  * external partitions, and communication target and populates the supplied 
  * MPIP_Request object. 
- * @param [in]  buf,        The location of the buffer holding the partitioned data.         
+ * @param [in]  buf,        The location of the buffer holding the partitioned data.
  * @param [in]  partitions, The number of external partitions to be created. 
  * @param [in]  count,      The number of elements in each partition 
  * @param [in]  datatype,   The datatype of the 
@@ -418,8 +418,8 @@ void sync_hard(int option, MPIP_Request* request);
  * This function allows one side of the communication to determine the number of 
  * internal messages. 
  * The driving side sends the information to the opposite side. 
- * @param [in] driver  which side of the communication is in charge of determining how many
- *                     internal messages to generate. 
+ * @param [in] driver  which side of the communication is in charge of determining
+ *                     how many internal messages to generate. 
  * @param [in, out] request Pointer to the request being initialized
  */
 void sync_side(enum P2P_Side driver, MPIP_Request* request);
