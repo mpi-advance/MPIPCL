@@ -51,7 +51,7 @@ The reciever may start accepting data once the init and start functions are comp
 ### Modifying Internal library behavior. 
 The internal behavior of the library can be modified by using the MPI_Info object supplied to the init functions. Please note that if modifying behavior using the MPI_Info object, the same object should be supplied to both sides of the communiction. Default behavior is to combine all partitions into a single message. 
 
-Valid Key:Value pairs for the MPI_Info object.  
+Valid key-value pairs for the MPI_Info object:  
 	PMODE: Controls the factor for determining how many internal message channels are setup. 
 		- HARD: The number of messages is set to the value in MPI_INFO.SET
 		- SENDER: The number of messages equals the number of external partitions at the sender.
