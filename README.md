@@ -59,6 +59,8 @@ Valid key-value pairs for the MPI_Info object:
 	
 	SET: How many internal messages to group external partitions into. Only used if PMODE=HARD or if no MPI_Info object is supplied. 
 		- Must be a positive integer greater than or equal to 1. 
+		
+If no MPI_Info object is defined or the keys are not set, then the library defaults to PNUM=HARD and SET=1. This results in a single internal message containing all the partitions. 
  
 # MPIPCL API
 
@@ -105,7 +107,8 @@ MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatyp
         - MPIPCL_REQUEST*       //request created
 
 ```
-- MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)```
+- MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
+```
     - Description: Setup internal requests for recieving partitions. May spawn thread to   
 	continue progress in background after return  
     - Inputs
@@ -133,7 +136,7 @@ MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatyp
 ```
 - MPIP_Pready_range(int partition_low, int partition_high, MPIPCL_REQUEST* request)
 ```
-  - Description: Mark the partitions with ids between partition_low and partition_high (inclusive) as ready to send. . 
+  - Description: Mark the partitions with ids between partition_low and partition_high (inclusive) as ready to send.
     The partitions should not be modified after being marked. 
     - Inputs: 
         - int partition: id of the partition to be marked
