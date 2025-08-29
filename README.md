@@ -6,7 +6,7 @@ Partitioned Communication is the breaking of a single buffer of data into smalle
 This is a component of the MPI-Advance Project!
 
 # Building Instructions
-### Prequisites
+### Prerequisite
 - MPI package (supporting MPI 3.0 or later)
 - CMake 3.17
 
@@ -96,34 +96,38 @@ MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatyp
     - Description: Setup internal requests and partitions. May spawn thread to   
 	continue progress in background after return  
     - Inputs
-        - void* buf             // Buffer containing data from all partitions
-        - int partitions        // Number of partitions to divide the buffer between
-        - MPI_Count count       // Number of 
-        - MPI_Datatype datatype // the datatype of the information to be received
-        - int src               // The rank from which the partitions originate. 
-        - int tag               //  A tag for the request
-        - MPI_Comm comm         // The communicator to be used. 
-        - MPI_Info info         // additional information to be used (see Doxygen page*)
+        - void* buf: Buffer containing data from all partitions
+        - int partitions:  Number of partitions to divide the buffer between
+        - MPI_Count count: Number of elements in each partition
+        - MPI_Datatype datatype the datatype of the information to be received
+        - int src:  The rank from which the partitions originate. 
+        - int tag:  A tag for the request
+        - MPI_Comm comm: The communicator to be used. 
+        - MPI_Info info: Additional information to be used to control behavior 
+		                (see Doxygen page*)
     - Outputs
-        - MPIP_Request*       //request created
-
+        - MPIP_Request* request: The request being populated
+	- Return
+		- MPI_Success if the operation completes successfully. 
 ```
 - MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIP_Request* request)
 ```
  - Description: Setup internal requests for receiving partitions. May spawn thread to   
 	continue progress in background after return  
     - Inputs
-        - void* buf: Buffer containing data
-        - int partitions: Number of partitions to divide the buffer between
-        - MPI_Count count: Number of 
-        - MPI_Datatype datatype:  
-        - int dest: The destination rank
+        - void* buf: Buffer containing data from all partitions
+        - int partitions:  Number of partitions to divide the buffer between
+        - MPI_Count count: Number of elements in each partition
+        - MPI_Datatype datatype the datatype of the information to be received
+        - int src:  The rank from which the partitions originate. 
         - int tag:  A tag for the request
         - MPI_Comm comm: The communicator to be used. 
-        - MPI_Info info: additional information to be used (see Doxygen page*)
+        - MPI_Info info: Additional information to be used to control behavior 
+		                (see Doxygen page*)
     - Outputs
-        - MPIP_Request* 	   //request created 
-
+        - MPIP_Request* request: The request being populated
+	- Return
+		- MPI_Success if the operation completes successfully. 
 ```
 - MPIP_Pready(int partition, MPIP_Request* request)
 ```
@@ -133,7 +137,8 @@ MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatyp
         - int partition: id of the partition to be marked  
     - Input/Outputs
 		- MPIP_Request* request: request containing the partitions to be marked. Partitions will be marked as ready after return.
-
+	- Return
+		- MPI_Success if the operation completes successfully. 
 ```
 - MPIP_Pready_range(int partition_low, int partition_high, MPIP_Request* request)
 ```
@@ -143,7 +148,8 @@ MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatyp
         - int partition: id of the partition to be marked
     - Input/Output
 		- MPIP_Request* request: request containing the partitions to be marked. Partitions will be marked as ready after return.     
-
+	- Return
+		- MPI_Success if the operation completes successfully. 
 ```
 - MPIP_Pready_list(int length, int array_of_partitions[], MPIP_Request* request)
 ```
@@ -156,7 +162,8 @@ MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatyp
         - int partition: id of the partition to be marked   
     - Input/Output
 		- MPIP_Request* request: request containing the partitions to be marked. Partitions will be marked as ready after return 
-
+	- Return
+		- MPI_Success if the operation completes successfully. 
 ```
 - MPIP_Parrived(MPIP_Request* request, int partition, int* flag)
 ``` 
@@ -166,7 +173,9 @@ MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatyp
         - int partition: id of the partition to be checked
     - Output:
         - flag: returned TRUE if the partition has arrived, False otherwise. 
-
+	- Return
+		- MPI_Success if the operation completes successfully. 
+		
 #### Classes and Structs
 Information about classes, structures, and internal functions may be accessed by using Doxygen with the supplied .DoxyFile (run `doxygen .Doxyfile` from the top level of this repo).
 
