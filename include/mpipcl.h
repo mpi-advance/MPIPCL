@@ -120,7 +120,7 @@ typedef struct _MPIP_Request
      * Should only be 1 if all internal messages have been complete, 
 	 * e.g. internal status is all 1's 
      */
-    bool* complete;  // status array - true if internal request has been started.
+    bool* complete;
 
     int local_parts;  //!< number of partitions visible externally
 
