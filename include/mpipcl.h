@@ -33,7 +33,7 @@ extern "C" {
 // structure to hold message settings if threaded sync is necessary
 /**
  * Structure to hold message settings if additional sycnchronization is necessary.
- * Contains necessary information to set up a 2-sided communication channel.
+ * Contains necessary information to set up a two-sided communication channel.
  */
 typedef struct _meta_
 {
