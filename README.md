@@ -106,7 +106,7 @@ MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatyp
 
 ```
 - MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)```
-    - Description: Setup internal requests for recieving partitions. May spawn thread to   
+    - Description: Setup internal requests for receiving partitions. May spawn thread to   
 	continue progress in background after return  
     - Inputs
         - void* buf: Buffer containing data
