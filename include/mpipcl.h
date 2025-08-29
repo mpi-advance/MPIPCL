@@ -259,7 +259,6 @@ as ready. The function works by calling MPIP_Pready on each partition
  matching the supplied id, including invoking general_send() after each successful mark. 
  Can only be called by sending process when the request is active. 
 * @ingroup user_api
-
 *@param [in]  length the number of partition ids included in \p array_of_partitions
 *@param [in]  array_of_partitions An array of partition ids to be marked as ready. 
 *@param [in, out] MPIP_Request* request request object to be populated. 
