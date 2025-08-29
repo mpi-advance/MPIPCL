@@ -66,32 +66,33 @@ If no MPI_Info object is defined or the keys are not set, then the library defau
 
 #### Partitioned Communication API
 ```c
-- MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
-- MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int src, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
-- MPIP_Pready(int partition, MPIPCL_REQUEST* request)
-- MPIP_Pready_range(int partition_low, int partition_high, MPIPCL_REQUEST* request)
-- MPIP_Pready_list(int length, int array_of_partitions[], MPIPCL_REQUEST* request)
-- MPIP_Parrived(MPIPCL_REQUEST* request, int partition, int* flag)
+- MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIP_Request* request)
+- MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int src, int tag, MPI_Comm comm, MPI_Info info, MPIP_Request* request)
+- MPIP_Pready(int partition, MPIP_Request* request)
+- MPIP_Pready_range(int partition_low, int partition_high, MPIP_Request* request)
+- MPIP_Pready_list(int length, int array_of_partitions[], MPIP_Request* request)
+- MPIP_Parrived(MPIP_Request* request, int partition, int* flag)
 ```
 
 #### Modified MPI Functions 
 These functions are simply MPIPCL overrides of standard MPI functions. They should be considered the same as their MPI counterparts with minimal functional alterations. 
 ```c
-- MPIP_Start(MPIPCL_REQUEST* request)
-- MPIP_Startall(int count, MPIPCL_REQUEST array_of_requests[])
-- MPIP_Wait(MPIPCL_REQUEST* request, MPI_Status* status)
-- MPIP_Wailall(int count, MPIPCL_REQUEST array_of_requests[], MPI_Status array_of_statuses[])
-- MPIP_Waitany(int count, MPIPCL_REQUEST array_of_requests[], int* index, MPI_Status* status)
-- MPIP_Waitsome(int incount, MPIPCL_REQUEST array_of_requests[], int* outcount, int array_of_indices[],MPI_Status array_of_statuses[]);
-- MPIP_Test(MPIPCL_REQUEST* request, int* flag, MPI_Status* status)
-- MPIP_Testall(int count, MPIPCL_REQUEST array_of_requests[], int* flag, MPI_Status array_of_statuses[]
-- MPIP_Testany(int count, MPIPCL_REQUEST array_of_requests[], int* index,int* flag, MPI_Status* status
-- MPIP_Testsome(int incount, MPIPCL_REQUEST array_of_requests[],int* outcount, int array_of_indices[],MPI_Status array_of_statuses[])
+- MPIP_Start(MPIP_Request* request)
+- MPIP_Startall(int count, MPIP_Request array_of_requests[])
+- MPIP_Wait(MPIP_Request* request, MPI_Status* status)
+- MPIP_Wailall(int count, MPIP_Request array_of_requests[], MPI_Status array_of_statuses[])
+- MPIP_Waitany(int count, MPIP_Request array_of_requests[], int* index, MPI_Status* status)
+- MPIP_Waitsome(int incount, MPIP_Request array_of_requests[], int* outcount, int array_of_indices[],MPI_Status array_of_statuses[]);
+- MPIP_Test(MPIP_Request* request, int* flag, MPI_Status* status)
+- MPIP_Testall(int count, MPIP_Request array_of_requests[], int* flag, MPI_Status array_of_statuses[]
+- MPIP_Testany(int count, MPIP_Request array_of_requests[], int* index,int* flag, MPI_Status* status
+- MPIP_Testsome(int incount, MPIP_Request array_of_requests[],int* outcount, int array_of_indices[],MPI_Status array_of_statuses[])
 - MPIP_Request_free(MPIP_REQUEST* request)
 ```
 ### Partitioned API
 ```
-MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)```
+MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIP_Request* request)
+```
     - Description: Setup internal requests and partitions. May spawn thread to   
 	continue progress in background after return  
     - Inputs
@@ -104,12 +105,12 @@ MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatyp
         - MPI_Comm comm         // The communicator to be used. 
         - MPI_Info info         // additional information to be used (see Doxygen page*)
     - Outputs
-        - MPIPCL_REQUEST*       //request created
+        - MPIP_Request*       //request created
 
 ```
-- MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIPCL_REQUEST* request)
+- MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIP_Request* request)
 ```
-    - Description: Setup internal requests for recieving partitions. May spawn thread to   
+ - Description: Setup internal requests for receiving partitions. May spawn thread to   
 	continue progress in background after return  
     - Inputs
         - void* buf: Buffer containing data
@@ -121,48 +122,47 @@ MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatyp
         - MPI_Comm comm: The communicator to be used. 
         - MPI_Info info: additional information to be used (see Doxygen page*)
     - Outputs
-        - MPIPCL_REQUEST* 	   //request created 
+        - MPIP_Request* 	   //request created 
 
 ```
-- MPIP_Pready(int partition, MPIPCL_REQUEST* request)
+- MPIP_Pready(int partition, MPIP_Request* request)
 ```
     - Description: Mark the supplied partition as ready for transfer. 
     The partition should not be modified after being marked. 
     - Inputs: 
         - int partition: id of the partition to be marked  
     - Input/Outputs
-		- MPIPCL_REQUEST* request: request containing the partitions to be marked. Partitions will be marked as ready after return.
+		- MPIP_Request* request: request containing the partitions to be marked. Partitions will be marked as ready after return.
 
 ```
-- MPIP_Pready_range(int partition_low, int partition_high, MPIPCL_REQUEST* request)
+- MPIP_Pready_range(int partition_low, int partition_high, MPIP_Request* request)
 ```
   - Description: Mark the partitions with ids between partition_low and partition_high (inclusive) as ready to send.
     The partitions should not be modified after being marked. 
     - Inputs: 
         - int partition: id of the partition to be marked
-           
     - Input/Output
-		- MPIPCL_REQUEST* request: request containing the partitions to be marked. Partitions will be marked as ready after return.     
+		- MPIP_Request* request: request containing the partitions to be marked. Partitions will be marked as ready after return.     
 
 ```
-- MPIP_Pready_list(int length, int array_of_partitions[], MPIPCL_REQUEST* request)
+- MPIP_Pready_list(int length, int array_of_partitions[], MPIP_Request* request)
 ```
   - Description: Mark the partitions with the ids listed in the array_of_partitions as ready to send.
-
     The partitions should not be modified after being marked. 
+	
     - Inputs: 
         - int length: the number of partitions in array_of_partitions
         - int array_of_partitions[]: an array of the ids of partitions to be marked
-        - int partition: id of the partition to be marked
-              
+        - int partition: id of the partition to be marked   
     - Input/Output
-		- MPIPCL_REQUEST* request: request containing the partitions to be marked. Partitions will be marked as ready after return 
+		- MPIP_Request* request: request containing the partitions to be marked. Partitions will be marked as ready after return 
 
 ```
-- MPIP_Parrived(MPIPCL_REQUEST* request, int partition, int* flag)
+- MPIP_Parrived(MPIP_Request* request, int partition, int* flag)
 ``` 
+	-Description: Sets flag to true if partitioned with the supplied id has arrived and is ready to use. 
     - Inputs 
-        - MPIPCL_REQUEST* request: request containing the partition to be marked.
+        - MPIP_Request* request: request containing the partition to be marked.
         - int partition: id of the partition to be checked
     - Output:
         - flag: returned TRUE if the partition has arrived, False otherwise. 
@@ -170,5 +170,5 @@ MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatyp
 #### Classes and Structs
 Information about classes, structures, and internal functions may be accessed by using Doxygen with the supplied .DoxyFile (run `doxygen .Doxyfile` from the top level of this repo).
 
-### Acknowlegments
+### Acknowledgments
 This work has been partially funded by ...

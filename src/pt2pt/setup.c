@@ -1,6 +1,6 @@
 /**
-* @file setup.c
-*/
+ * @file setup.c
+ */
 
 #include "mpipcl.h"
 
