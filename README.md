@@ -165,7 +165,7 @@ MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatyp
         - flag: returned TRUE if the partition has arrived, False otherwise. 
 
 #### Classes and Structs
-Information about classes, structures, and internal functions may be accessed by using Doxygen with the supplied .DoxyFile
+Information about classes, structures, and internal functions may be accessed by using Doxygen with the supplied .DoxyFile (run `doxygen .Doxyfile` from the top level of this repo).
 
 ### Acknowlegments
 This work has been partially funded by ...
