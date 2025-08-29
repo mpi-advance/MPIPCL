@@ -8,5 +8,6 @@ mpipcltest5
 *.a
 *.exe
 
+docs/
 build/
 **/.vscode/

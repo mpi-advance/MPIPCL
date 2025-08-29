@@ -1,36 +1,183 @@
-# MPIPCL
+# Overview
 Library implementation of MPI-4 Partitioned Communication (currently using persistent point-to-point communication).
+
+Partitioned Communication is the breaking of a single buffer of data into smaller chunks(partitions) that can be prepared and sent independent of each other. Each partition can be safely modified and sent by a individual thread. 
 
 This is a component of the MPI-Advance Project!
 
-The API provided by this project can be found in `mpipcl.h` in `/include/`. The source code is in the `/src/pt2pt` folder. The current version of our library creates an individual MPI Request for each partition, that is stored in the `MPIP_Request` object. These partition requests are launched with the respective calls to `MPI_PREADY` (or its variants) on the send-side. On the receive-side, the partition requests are launched when the `MPIP_Request` is started. The current version of the library also features a progress thread in the background to synchronize the number of internal partitions to use (useful for when the send-side and receive-side partitions don't match).
+# Building Instructions
+### Prerequisite
+- MPI package (supporting MPI 3.0 or later)
+- CMake 3.17
 
-The current implementation makes the following assumptions/shortcuts:
-1) The datatype is the same on both the sender and receiver processes
-2) Only contiguous datatype is supported
-3) The amount of data described on the send-side must match the amount of data described on the receive-side, even if the partitions do not match
-4) The status object is not updated; it is ignored
-5) These API are invoked in MPI_THREAD_SERIALIZED mode (i.e., MPI_Init_thread with thread support for MPI_THREAD_SERIALIZED is used instead of MPI_Init)
-6) A new MPI request object called MPIP_Request is used to support partitioned communication
-
-
-## Building
-The MPIPCL library is a fairly simple cmake build:
-
+### Building the Library
+The MPIPCL library is a fairly simple CMake build:
 ```
 mkdir <build_dir>
 cd <build_dir>
 cmake <options> ..
 make
 ```
-A loaded MPI package is required, along with CMake version 3.17 or higher. CMake should detect the MPI and pick the right compiler, but always double check the output to make sure.
 
-By default cmake creates a shared library in the build folder, to instead create a static library run  option '-DBUILD_DYNAMIC_LIBS=OFF'
+### Build Options
+ - `-DBUILD_SHARED_LIBS` (ON) : Builds a shared library instead of a static library
+ - `-DBUILD_EXAMPLES` (OFF): Build some examples. Examples by default are in `<build>/examples/BASIC`
+ - `-DEXAMPLES_TO_BIN` (OFF) : If building examples, will also install examples to `<install_dir>/bin` in addition to `<build>/examples/BASIC`
 
-## Examples
-There are six examples provided by this library (found in the `examples/Basic` folder) Each example has the specific execution instructions at the top, but most follow this pattern:
-`mpirun -np <num_processes> ./<test_executable> <npartitions> <bufsize>`
+### Using the Library
+In order to use the library, you will need to make sure it is either included in RPATH or the containing directory is added to LD_LIBRARY_PATH and you will need to include the supplied MPIPCL.h.  
 
-The first, second, and sixth example programs require only two processes, while the third, fourth, and fifth example programs require five processes. Note that `bufsize % npartitions == 0` must be true for all examples and combinations of buffer sizes and number of partitions. The fifth test is testing all of the `MPIP_Wait\Test` functions and their variants.
+# Basic Library Operation
+The library requires a basic ordering of functions calls to work as designed. The init functions must be called before anyother function. These functions setup the internal channels for communication between the processes. This process occurs on a background thread and can prevent progress until completion, however the main thread may continue uninterrupted. 
 
-If `-DBUILD_EXAMPLES=ON` is provided during the `cmake` command, the tests will also be built when building MPIPCL. 
+Then the generated requests must be activated with `MPIP_Start`. NO DATA is transfered at this stage. 
+
+Each partition on the sending side must be marked as ready by one of the Pready functions. Once marked ready the partition will be queued to send once the init functions finish the setup. Calling a wait operation on the request will block until all partitions in that request have been sent. 
+
+The receiver may start accepting data once the init and start functions are complete. The data is placed in the receive buffer at an offset determined by the init functions. The arrival status of a particular partition can be determined using `MPIP_Parrived`.
+
+####  Sender-Side:
+1. MPIP_Psend_init()
+2. MPIP_Start()
+3. MPIP_Pready()
+4. MPIP_Wait()
+
+#### Reciever-Side
+1. MPIP_Precv_init()
+2. MPIP_Start()
+3. MPIP_Parrived()
+4. MPIP_Wait()
+
+### Modifying Internal library behavior. 
+The internal behavior of the library can be modified by using the MPI_Info object supplied to the init functions. Please note that if modifying behavior using the MPI_Info object, the same object should be supplied to both sides of the communiction. Default behavior is to combine all partitions into a single message. 
+
+Valid key-value pairs for the MPI_Info object:  
+	PMODE: Controls the factor for determining how many internal message channels are setup. 
+		- HARD: The number of messages is set to the value in MPI_INFO.SET
+		- SENDER: The number of messages equals the number of external partitions at the sender.
+		- RECIEVER: The number of messages equals the number of external partitions at the sender.
+	
+	SET: How many internal messages to group external partitions into. Only used if PMODE=HARD or if no MPI_Info object is supplied. 
+		- Must be a positive integer greater than or equal to 1. 
+		
+If no MPI_Info object is defined or the keys are not set, then the library defaults to PNUM=HARD and SET=1. This results in a single internal message containing all the partitions. 
+ 
+# MPIPCL API
+
+#### Partitioned Communication API
+```c
+- MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIP_Request* request)
+- MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int src, int tag, MPI_Comm comm, MPI_Info info, MPIP_Request* request)
+- MPIP_Pready(int partition, MPIP_Request* request)
+- MPIP_Pready_range(int partition_low, int partition_high, MPIP_Request* request)
+- MPIP_Pready_list(int length, int array_of_partitions[], MPIP_Request* request)
+- MPIP_Parrived(MPIP_Request* request, int partition, int* flag)
+```
+
+#### Modified MPI Functions 
+These functions are simply MPIPCL overrides of standard MPI functions. They should be considered the same as their MPI counterparts with minimal functional alterations. 
+```c
+- MPIP_Start(MPIP_Request* request)
+- MPIP_Startall(int count, MPIP_Request array_of_requests[])
+- MPIP_Wait(MPIP_Request* request, MPI_Status* status)
+- MPIP_Wailall(int count, MPIP_Request array_of_requests[], MPI_Status array_of_statuses[])
+- MPIP_Waitany(int count, MPIP_Request array_of_requests[], int* index, MPI_Status* status)
+- MPIP_Waitsome(int incount, MPIP_Request array_of_requests[], int* outcount, int array_of_indices[],MPI_Status array_of_statuses[]);
+- MPIP_Test(MPIP_Request* request, int* flag, MPI_Status* status)
+- MPIP_Testall(int count, MPIP_Request array_of_requests[], int* flag, MPI_Status array_of_statuses[]
+- MPIP_Testany(int count, MPIP_Request array_of_requests[], int* index,int* flag, MPI_Status* status
+- MPIP_Testsome(int incount, MPIP_Request array_of_requests[],int* outcount, int array_of_indices[],MPI_Status array_of_statuses[])
+- MPIP_Request_free(MPIP_REQUEST* request)
+```
+### Partitioned API
+```
+MPIP_Psend_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIP_Request* request)
+```
+    - Description: Setup internal requests and partitions. May spawn thread to   
+	continue progress in background after return  
+    - Inputs
+        - void* buf: Buffer containing data from all partitions
+        - int partitions:  Number of partitions to divide the buffer between
+        - MPI_Count count: Number of elements in each partition
+        - MPI_Datatype datatype the datatype of the information to be received
+        - int src:  The rank from which the partitions originate. 
+        - int tag:  A tag for the request
+        - MPI_Comm comm: The communicator to be used. 
+        - MPI_Info info: Additional information to be used to control behavior 
+		                (see Doxygen page*)
+    - Outputs
+        - MPIP_Request* request: The request being populated
+	- Return
+		- MPI_Success if the operation completes successfully. 
+```
+- MPIP_Precv_init(void* buf, int partitions, MPI_Count count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Info info, MPIP_Request* request)
+```
+ - Description: Setup internal requests for receiving partitions. May spawn thread to   
+	continue progress in background after return  
+    - Inputs
+        - void* buf: Buffer containing data from all partitions
+        - int partitions:  Number of partitions to divide the buffer between
+        - MPI_Count count: Number of elements in each partition
+        - MPI_Datatype datatype the datatype of the information to be received
+        - int src:  The rank from which the partitions originate. 
+        - int tag:  A tag for the request
+        - MPI_Comm comm: The communicator to be used. 
+        - MPI_Info info: Additional information to be used to control behavior 
+		                (see Doxygen page*)
+    - Outputs
+        - MPIP_Request* request: The request being populated
+	- Return
+		- MPI_Success if the operation completes successfully. 
+```
+- MPIP_Pready(int partition, MPIP_Request* request)
+```
+    - Description: Mark the supplied partition as ready for transfer. 
+    The partition should not be modified after being marked. 
+    - Inputs: 
+        - int partition: id of the partition to be marked  
+    - Input/Outputs
+		- MPIP_Request* request: request containing the partitions to be marked. Partitions will be marked as ready after return.
+	- Return
+		- MPI_Success if the operation completes successfully. 
+```
+- MPIP_Pready_range(int partition_low, int partition_high, MPIP_Request* request)
+```
+  - Description: Mark the partitions with ids between partition_low and partition_high (inclusive) as ready to send.
+    The partitions should not be modified after being marked. 
+    - Inputs: 
+        - int partition: id of the partition to be marked
+    - Input/Output
+		- MPIP_Request* request: request containing the partitions to be marked. Partitions will be marked as ready after return.     
+	- Return
+		- MPI_Success if the operation completes successfully. 
+```
+- MPIP_Pready_list(int length, int array_of_partitions[], MPIP_Request* request)
+```
+  - Description: Mark the partitions with the ids listed in the array_of_partitions as ready to send.
+    The partitions should not be modified after being marked. 
+	
+    - Inputs: 
+        - int length: the number of partitions in array_of_partitions
+        - int array_of_partitions[]: an array of the ids of partitions to be marked
+        - int partition: id of the partition to be marked   
+    - Input/Output
+		- MPIP_Request* request: request containing the partitions to be marked. Partitions will be marked as ready after return 
+	- Return
+		- MPI_Success if the operation completes successfully. 
+```
+- MPIP_Parrived(MPIP_Request* request, int partition, int* flag)
+``` 
+	-Description: Sets flag to true if partitioned with the supplied id has arrived and is ready to use. 
+    - Inputs 
+        - MPIP_Request* request: request containing the partition to be marked.
+        - int partition: id of the partition to be checked
+    - Output:
+        - flag: returned TRUE if the partition has arrived, False otherwise. 
+	- Return
+		- MPI_Success if the operation completes successfully. 
+		
+#### Classes and Structs
+Information about classes, structures, and internal functions may be accessed by using Doxygen with the supplied .DoxyFile (run `doxygen .Doxyfile` from the top level of this repo).
+
+### Acknowledgments
+This work has been partially funded by ...
