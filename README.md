@@ -32,7 +32,7 @@ The library requires a basic ordering of functions calls to work as designed. Th
 
 Then the generated requests must be activated with MPIP_Start. NO DATA is transfered at this stage. 
 
-Each partition on the Sender must be marked as ready by one of the Pready functions. Once marked ready the partition will be queued to send once the init functions finish the setup. Calling a wait operation on the request will block until all partitions in that request have been sent. 
+Each partition on the sending side must be marked as ready by one of the Pready functions. Once marked ready the partition will be queued to send once the init functions finish the setup. Calling a wait operation on the request will block until all partitions in that request have been sent. 
 
 The reciever may start accepting data once the init and start functions are complete. The data is placed in the recieve buffer at an offset determined by the init functions. The arrival status of a particular partition can be determined using MPIP_Parrived. 
 
