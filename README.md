@@ -45,7 +45,7 @@ The receiver may start accepting data once the init and start functions are comp
 #### Reciever-Side
 1. MPIP_Precv_init()
 2. MPIP_Start()
-3. MPIP_PArrived()
+3. MPIP_Parrived()
 4. MPIP_Wait()
 
 ### Modifying Internal library behavior. 
