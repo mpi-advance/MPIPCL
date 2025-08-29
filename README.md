@@ -73,7 +73,7 @@ Valid key-value pairs for the MPI_Info object:
 ```
 
 #### Modified MPI Functions 
-These functions are simiply MPIPCL overrides of standard MPI functions. They should be considered the same as their MPI counterparts with minimal functional alterations. 
+These functions are simply MPIPCL overrides of standard MPI functions. They should be considered the same as their MPI counterparts with minimal functional alterations. 
 ```c
 - MPIP_Start(MPIPCL_REQUEST* request)
 - MPIP_Startall(int count, MPIPCL_REQUEST array_of_requests[])
