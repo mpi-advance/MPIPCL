@@ -30,7 +30,7 @@ In order to use the library, you will need to make sure it is either included in
 # Basic Library Operation
 The library requires a basic ordering of functions calls to work as designed. The init functions must be called before anyother function. These functions setup the internal channels for communication between the processes. This process occurs on a background thread and can prevent progress until completion, however the main thread may continue uninterrupted. 
 
-Then the generated requests must be activated with MPIP_Start. NO DATA is transfered at this stage. 
+Then the generated requests must be activated with `MPIP_Start`. NO DATA is transfered at this stage. 
 
 Each partition on the sending side must be marked as ready by one of the Pready functions. Once marked ready the partition will be queued to send once the init functions finish the setup. Calling a wait operation on the request will block until all partitions in that request have been sent. 
 
