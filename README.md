@@ -6,10 +6,10 @@ Partitioned Communication is the breaking of a single buffer of data into smalle
 This is a component of the MPI-Advance Project!
 
 # Building Instructions
-### Prerequisite
-- MPI package (supporting MPI 3.0 or later)
-- CMake 3.17
-- C11
+### Prerequisites
+- MPI implementation supporting MPI 3.0+
+- CMake 3.17+
+- C11+
 
 ### Building the Library
 The MPIPCL library is a fairly simple CMake build:
@@ -20,13 +20,13 @@ cmake <options> ..
 make <options>
 ```
 
-### Build Options
+### CMake Build Options
  - `-DBUILD_SHARED_LIBS` (ON) : Builds a shared library instead of a static library
  - `-DBUILD_EXAMPLES` (OFF): Build some examples. Examples by default are in `<build>/examples/BASIC`
  - `-DEXAMPLES_TO_BIN` (OFF) : If building examples, will also install examples to `<install_dir>/bin` in addition to `<build>/examples/BASIC`
 
 ### Using the Library
-In order to use the library, you will need to make sure it is either included in RPATH or the containing directory is added to LD_LIBRARY_PATH and you will need to include the supplied MPIPCL.h.  
+In order to use the library, you will need to make sure it is either included in RPATH or the containing directory is added to LD_LIBRARY_PATH and you will need to include the supplied `MPIPCL.h`.  
 
 # Basic Library Operation
 The library requires a basic ordering of functions calls to work as designed (an example is shown below). The init functions (`MPIP_<Psend/Precv>_init`) must be called first to create a partitioned request. These functions setup the internal channels for communication between the processes, using a background thread to perform any communication necessary to setup the requests. Next, the generated requests must be activated with `MPIP_Start`. NO DATA is transferred at this stage. 
@@ -58,7 +58,7 @@ Valid key-value pairs for the MPI_Info object:
 - `SET`: How many internal messages to group external partitions into. Only used if `PMODE=HARD` or if no `MPI_Info` object is supplied. 
     - Must be a positive integer greater than or equal to 1. 
 		
-If `MPI_INFO_NULL` is provided, or the keys are not set, then the library defaults to `PMODE=HARD` and `SET=1`. This results in a single internal message containing all the partitions. 
+If `MPI_INFO_NULL` is provided, or the keys are not set, then the library defaults to `PMODE=HARD` and `SET=1`. This results in a single internal message containing all the partitions that will only be sent once all user-facing partitions (the number provided to the `MPIP_Psend_init` call) have been marked as ready.
  
 # MPIPCL API
 
