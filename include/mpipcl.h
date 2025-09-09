@@ -116,12 +116,6 @@ typedef struct _MPIP_Request
     atomic_int* internal_status;
 #endif
 
-    /** @brief Booleans representing the completion status of the overall request
-     * @details
-     * TO BE REMOVED
-     */
-    bool* complete;
-
     /** @brief Number of partitions visible externally
      * @details
      * This value is equal to the partitions number provided by the user in
@@ -442,8 +436,6 @@ int sync_driver(MPI_Info info, MPIP_Request* request);
  * number of messages and partitions are determined:
  * - MPIP_Request::request
  * - MPIP_Request::internal_status
- * - MPIP_Request::complete
- * @todo REMOVE COMPLETE
  *
  * @param [in, out] request Pointer to the @ref MPIP_Request being initialized
  */
@@ -454,8 +446,6 @@ void internal_setup(MPIP_Request* request);
  * Reset the following members to zero in preparation of starting the request again:
  * - MPIP_Request::internal_status (internal partitions)
  * - MPIP_Request::local_status (external partitions)
- * - MPIP_Request::complete
- * @todo REMOVE COMPLETE
  *
  * @param [in, out] request Pointer to the @ref MPIP_Request being reset
  */

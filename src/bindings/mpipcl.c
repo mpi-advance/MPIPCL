@@ -365,7 +365,6 @@ int MPIP_Request_free(MPIP_Request* request)
     // free internal request status buffers
     free(request->local_status);
     free(request->internal_status);
-    free(request->complete);
 
     // free comm_data -- //could this be freed earlier?
     free(request->comm_data);
