@@ -1,3 +1,7 @@
+/**
+ * @file setup.c
+ */
+
 #include "mpipcl.h"
 
 // functions used by both side of the communication.

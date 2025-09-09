@@ -1,9 +1,11 @@
+/**
+ * @file send.c
+ */
+
 #include <math.h>
 
 #include "mpipcl.h"
 
-// call send function on all marked partitions
-// catchup function for sync thread.
 void send_ready(MPIP_Request* request)
 {
     // call send on each currently marked partition
@@ -16,6 +18,19 @@ void send_ready(MPIP_Request* request)
     }
 }
 
+/** @brief Map an external partition id to internal id range
+ * @details
+ * This function maps between an external partition
+ * to which internal messages are in charge of transmitting the data. Currently, this
+ * functions assumes there are more internal (network) partitions than external (user)
+ * partitions.
+ * @param [in] user_partition_id The id of the external user partition to map
+ * @param [in, out] request      The @ref MPIP_Request containing the partition
+ * @param [out] start            The id of the first internal partition corresponding to
+ *                               the provided external partition
+ * @param [out] end              The id of the last internal partition corresponding to
+ *                               the provided external partition
+ */
 static inline void map_local_to_network_partitions(int user_partition_id,
                                                    MPIP_Request* request,
                                                    int* start,
