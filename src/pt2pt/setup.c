@@ -145,9 +145,6 @@ void internal_setup(MPIP_Request* request)
     request->internal_status = (atomic_int*)malloc(sizeof(atomic_int) * request->parts);
     assert(request->internal_status != NULL);
 
-    request->complete = (bool*)malloc(sizeof(bool) * request->parts);
-    assert(request->complete != NULL);
-
     // for each allocated partition create a request based on side.
     for (int i = 0; i < request->parts; i++)
     {
@@ -184,7 +181,6 @@ void internal_setup(MPIP_Request* request)
 
         // Since they're atomic, might as well do the atomic init call
         atomic_init(&request->internal_status[i], 0);
-        request->complete[i] = 0;
     }
 }
 
@@ -195,7 +191,6 @@ void reset_status(MPIP_Request* request)
     for (int i = 0; i < request->parts; i++)
     {
         request->internal_status[i] = 0;
-        request->complete[i]        = 0;
     }
     for (int i = 0; i < request->local_parts; i++)
     {
