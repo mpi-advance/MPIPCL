@@ -89,4 +89,5 @@ install(EXPORT MPIPCLTargets
 	DESTINATION share/${PROJECT_NAME}
 )
 
+add_subdirectory(tests)
 enable_testing()
