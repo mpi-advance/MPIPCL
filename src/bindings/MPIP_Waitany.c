@@ -1,5 +1,5 @@
 /**
-* @file mpipcl.c
+* @file MPIP_Waitany.c
 */
 
 #include "mpipcl.h"

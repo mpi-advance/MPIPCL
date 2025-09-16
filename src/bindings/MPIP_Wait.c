@@ -1,5 +1,5 @@
 /**
-* @file mpipcl.c
+* @file MPIP_Wait.c
 */
 
 #include "mpipcl.h"

@@ -1,5 +1,5 @@
 /**
-* @file mpipcl.c
+* @file MPIP_Psend_init.c
 */
 
 #include "mpipcl.h"

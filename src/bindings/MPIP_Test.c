@@ -1,5 +1,5 @@
 /**
-* @file mpipcl.c
+* @file MPIP_Test.c
 */
 
 #include "mpipcl.h"
