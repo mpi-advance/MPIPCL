@@ -43,6 +43,7 @@ int main(int argc, char* argv[])
     if ((size != 2) || (bufsize % nparts != 0))
     {
         printf("comm size must be 2 and bufsize must be divisible by nparts\n");
+		printf("comm size %d, buffsize %d, nparts %d\n", size, bufsize, nparts);
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 

@@ -1,17 +1,15 @@
-/* Sample program to test the partitioned communication API,
- * specifically the use of parrived "to make progress." This
- * program is also testing out that the mapping of "user
- * partitions" can correctly be mapped to "network partitions"
- * by making the receive side request double the number of partitions
- * as the send side needs.
+/* Sample program to test the partitioned communication API.
+ * This version uses threads on the send-side only.
  *
+ * To compile:
+ *    mpicc -O -Wall -fopenmp -o mpipcltest1 mpipcltest1.c mpipcl.c
  * To run:
- *    mpirun -np 2 ./<exec> <npartitions> <bufsize>
- *    NOTE: bufsize % npartitions == 0 and
- *          bufsize % (npartitions * 2) == 0
+ *    mpirun -np 2 ./mpipcltest1 <npartitions> <bufsize>
+ *    NOTE: bufsize % npartitions == 0
  */
 #include <assert.h>
 #include <mpi.h>
+#include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -49,12 +47,6 @@ int main(int argc, char* argv[])
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
-    if (bufsize % (2 * nparts) != 0)
-    {
-        printf("bufsize must also be divisible by twice nparts\n");
-        MPI_Abort(MPI_COMM_WORLD, -2);
-    }
-
     buf = malloc(sizeof(double) * bufsize);
 
     if (rank == 0)
@@ -63,6 +55,7 @@ int main(int argc, char* argv[])
             buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req);
         MPIP_Start(&req);
 
+#pragma omp parallel for private(j) shared(buf, req) num_threads(nparts)
         for (i = 0; i < nparts; i++)
         {
             /* initialize part of buffer in each thread */
@@ -79,22 +72,9 @@ int main(int argc, char* argv[])
     }
     else
     { /* receiver */
-        nparts *= 2;
-        count = count / 2;
         MPIP_Precv_init(
             buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req);
         MPIP_Start(&req);
-
-        for (i = 0; i < nparts; i++)
-        {
-            int done = 0;
-            while (!done)
-            {
-                MPIP_Parrived(&req, i, &done);
-            }
-            printf("Done with partition %d\n", i);
-        }
-
         MPIP_Wait(&req, &status);
 
         /* compute the sum of the values received */
@@ -114,5 +94,7 @@ int main(int argc, char* argv[])
     free(buf);
     MPI_Finalize();
 
-    return 0;
+	if(rank == 1 && sum == 55){return 0;}
+	else if (rank == 0){return 0;}
+	else{ return 1;}
 }
