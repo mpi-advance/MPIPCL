@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.17 FATAL_ERROR)
 project(MPIPCL VERSION 1.4.0 LANGUAGES C)
 include(CMakeDependentOption)
+include(CTest)
 
 ##### Available options #####
 option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
@@ -15,6 +16,8 @@ add_library(MPIPCL "")
 set_target_properties(MPIPCL PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(MPIPCL PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
 set_target_properties(MPIPCL PROPERTIES PUBLIC_HEADER include/mpipcl.h)
+set_target_properties(MPIPCL PROPERTIES PRIVATE_HEADER include/MPIP_Request.h)
+# set_target_properties(MPIPCL PROPERTIES PRIVATE_HEADER include/pt2pt.h)
 set_target_properties(MPIPCL PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(MPIPCL PROPERTIES C_STANDARD 11)
 
@@ -87,3 +90,6 @@ install(EXPORT MPIPCLTargets
 	NAMESPACE MPIAdvance::
 	DESTINATION share/${PROJECT_NAME}
 )
+
+add_subdirectory(tests)
+enable_testing()
