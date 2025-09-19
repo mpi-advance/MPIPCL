@@ -5,6 +5,7 @@
 #include <math.h>
 
 #include "mpipcl.h"
+#include "pt2pt.h"
 
 void send_ready(MPIP_Request* request)
 {

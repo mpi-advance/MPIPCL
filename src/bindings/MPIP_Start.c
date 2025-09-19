@@ -3,6 +3,7 @@
 */
 
 #include "mpipcl.h"
+#include "pt2pt.h"
 
 #ifdef __cplusplus
 extern "C" {

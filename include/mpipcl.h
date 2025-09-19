@@ -21,7 +21,7 @@ extern "C" {
 #endif
 #include <assert.h>
 #include "MPIP_Request.h"
-#include "pt2pt.h"
+
 /** @brief The length used for MPI_Info-related strings. */
 #define MPIPCL_TAG_LENGTH 20
 
