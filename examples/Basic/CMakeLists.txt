@@ -1,9 +1,6 @@
 set(mpipcl_test_execs "")
 set(mpipcl_test_cxx_execs "")
 
-add_executable(ctest1 ctest1.c)
-list(APPEND mpipcl_test_execs ctest1)
-
 add_executable(MPIPCL_Test_1 mpipcltest1.c)
 list(APPEND mpipcl_test_execs MPIPCL_Test_1)
 
