@@ -59,6 +59,20 @@ if(BUILD_EXAMPLES)
 	add_subdirectory(examples)
 endif()
 
+##### Add subdirectory for testing
+add_subdirectory(tests)
+enable_testing()
+
+##### Add Doxygen
+#find_package(Doxygen)
+#if(Doxygen_FOUND)
+#	set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+#	set(DOXYFILE_IN ${CMAKE_CURRENT_BINARY_DIR}/.Doxyfile)
+#	message(STATUS "doxygen -- ${CMAKE_CURRENT_BINARY_DIR}")
+#	doxygen_add_docs(doxygen ${CMAKE_CURRENT_BINARY_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/include ALL)
+#endif()
+
+
 ##### install mpipcl #####
 install(TARGETS MPIPCL
 	    EXPORT MPIPCLTargets)
@@ -91,5 +105,3 @@ install(EXPORT MPIPCLTargets
 	DESTINATION share/${PROJECT_NAME}
 )
 
-add_subdirectory(tests)
-enable_testing()
