@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 3.17 FATAL_ERROR)
 project(MPIPCL VERSION 1.4.0 LANGUAGES C)
 include(CMakeDependentOption)
+include(CTest)
 
 ##### Available options #####
 option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
@@ -15,6 +16,8 @@ add_library(MPIPCL "")
 set_target_properties(MPIPCL PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(MPIPCL PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
 set_target_properties(MPIPCL PROPERTIES PUBLIC_HEADER include/mpipcl.h)
+set_target_properties(MPIPCL PROPERTIES PRIVATE_HEADER include/MPIP_Request.h)
+# set_target_properties(MPIPCL PROPERTIES PRIVATE_HEADER include/pt2pt.h)
 set_target_properties(MPIPCL PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(MPIPCL PROPERTIES C_STANDARD 11)
 
@@ -56,6 +59,20 @@ if(BUILD_EXAMPLES)
 	add_subdirectory(examples)
 endif()
 
+##### Add subdirectory for testing
+add_subdirectory(tests)
+enable_testing()
+
+##### Add Doxygen
+#find_package(Doxygen)
+#if(Doxygen_FOUND)
+#	set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+#	set(DOXYFILE_IN ${CMAKE_CURRENT_BINARY_DIR}/.Doxyfile)
+#	message(STATUS "doxygen -- ${CMAKE_CURRENT_BINARY_DIR}")
+#	doxygen_add_docs(doxygen ${CMAKE_CURRENT_BINARY_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/include ALL)
+#endif()
+
+
 ##### install mpipcl #####
 install(TARGETS MPIPCL
 	    EXPORT MPIPCLTargets)
@@ -87,3 +104,4 @@ install(EXPORT MPIPCLTargets
 	NAMESPACE MPIAdvance::
 	DESTINATION share/${PROJECT_NAME}
 )
+

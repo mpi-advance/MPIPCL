@@ -3,6 +3,7 @@
  */
 
 #include "mpipcl.h"
+#include "pt2pt.h"
 // implemented synchronization modes
 
 void sync_hard(int option, MPIP_Request* request)

@@ -1,10 +1,15 @@
 /* Sample program to test the partitioned communication API.
- * This version uses threads on the send-side only.
+ * This version uses threads on the send-side only, but allows
+ * users to change the behind the scenes mode of partition
+ * negotiation.
  *
- * To compile:
- *    mpicc -O -Wall -fopenmp -o mpipcltest1 mpipcltest1.c mpipcl.c
  * To run:
- *    mpirun -np 2 ./mpipcltest1 <npartitions> <bufsize>
+ *    mpirun -np 2 ./<test> <npartitions> <bufsize> <mode>
+ *    WHERE <mode> = 0 MPI_INFO_NULL -- library default)
+ *                   1 PMODE = SENDER -- sender's partitions
+ *                   2 PMODE = RECEIVER -- receiver's partitions
+ *                   3 PMODE = HARD  -- a specific number chosen,
+ *                              controlled by "HARD_NUMBER" below
  *    NOTE: bufsize % npartitions == 0
  */
 #include <assert.h>
@@ -15,9 +20,11 @@
 
 #include "mpipcl.h"
 
+const char HARD_NUMBER = '2';
+
 int main(int argc, char* argv[])
 {
-    int rank, size, nparts, bufsize, count, tag = 0xbad;
+    int rank, size, nparts, mode, bufsize, count, tag = 0xbad;
     int i, j, provided;
     double *buf, sum;
     MPIP_Request req;
@@ -30,20 +37,47 @@ int main(int argc, char* argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     assert(size == 2);
 
-    if (argc != 3)
+    if (argc != 4)
     {
-        printf("Usage: %s <#partitions> <bufsize>\n", argv[0]);
+        printf("Usage: %s <#partitions> <bufsize> <mode>\n", argv[0]);
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
     nparts  = atoi(argv[1]);
     bufsize = atoi(argv[2]);
     count   = bufsize / nparts;
+    mode    = atoi(argv[3]);
+    if (mode < 0 || mode > 3)
+    {
+        printf("Invalid mode for this test.\n");
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+    MPI_Info the_info;
+    if (mode == 0)
+    {
+        the_info = MPI_INFO_NULL;
+    }
+    else if (mode == 1)
+    {
+        MPI_Info_create(&the_info);
+        MPI_Info_set(the_info, "PMODE", "SENDER");
+    }
+    else if (mode == 2)
+    {
+        MPI_Info_create(&the_info);
+        MPI_Info_set(the_info, "PMODE", "RECEIVER");
+    }
+    else
+    {
+        MPI_Info_create(&the_info);
+        MPI_Info_set(the_info, "PMODE", "HARD");
+        MPI_Info_set(the_info, "SET", &HARD_NUMBER);
+    }
 
     if ((size != 2) || (bufsize % nparts != 0))
     {
         printf("comm size must be 2 and bufsize must be divisible by nparts\n");
-		printf("comm size %d, buffsize %d, nparts %d\n", size, bufsize, nparts);
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
 
@@ -52,7 +86,7 @@ int main(int argc, char* argv[])
     if (rank == 0)
     { /* sender */
         MPIP_Psend_init(
-            buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req);
+            buf, nparts, count, MPI_DOUBLE, 1, tag, MPI_COMM_WORLD, the_info, &req);
         MPIP_Start(&req);
 
 #pragma omp parallel for private(j) shared(buf, req) num_threads(nparts)
@@ -73,7 +107,7 @@ int main(int argc, char* argv[])
     else
     { /* receiver */
         MPIP_Precv_init(
-            buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, MPI_INFO_NULL, &req);
+            buf, nparts, count, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, the_info, &req);
         MPIP_Start(&req);
         MPIP_Wait(&req, &status);
 
@@ -90,6 +124,10 @@ int main(int argc, char* argv[])
                sum);
     }
 
+    if (mode != 0)
+    {
+        MPI_Info_free(&the_info);
+    }
     MPIP_Request_free(&req);
     free(buf);
     MPI_Finalize();
