@@ -59,7 +59,7 @@ if(BUILD_EXAMPLES)
 	add_subdirectory(examples)
 endif()
 
-##### Add subdirectory for testing
+##### Add sub-directory for testing
 #add_subdirectory(tests)
 #enable_testing()
 
@@ -81,7 +81,7 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/cmake/mpipcl-config.cmake.in
 	${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-	INSTALL_DESTINATION /${PROJECT_NAME}
+	INSTALL_DESTINATION share/${PROJECT_NAME}
 )
 
 ## Version file
