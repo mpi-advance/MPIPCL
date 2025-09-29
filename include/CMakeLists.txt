@@ -3,4 +3,3 @@ target_include_directories(MPIPCL PUBLIC
 	$<INSTALL_INTERFACE:include>
 )
 
-message(STATUS "TEST")
