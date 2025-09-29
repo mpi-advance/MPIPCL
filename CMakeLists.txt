@@ -64,11 +64,11 @@ endif()
 #enable_testing()
 
 ##### Add Doxygen
-#find_package(Doxygen)
-#if(Doxygen_FOUND)
-#	set(DOXYGEN_CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/.Doxyfile)
-#	doxygen_add_docs(doxygen_docs ${DOXYGEN_CONFIG_FILE} ALL)
-#endif()
+find_package(Doxygen)
+if(Doxygen_FOUND)
+	set(DOXYGEN_CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/.Doxyfile)
+	doxygen_add_docs(doxygen_docs ${DOXYGEN_CONFIG_FILE} ALL)
+endif()
 
 ##### install mpipcl #####
 install(TARGETS MPIPCL
