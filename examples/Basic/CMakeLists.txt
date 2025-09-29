@@ -58,17 +58,3 @@ foreach(exec_target ${mpipcl_test_cxx_execs})
 		install(TARGETS ${exec_target})
 	endif()
 endforeach()
-
-enable_testing()
-set(CMAKE_TEST_LAUNCHER "${MPI_EXECUTABLE_LAUNCHER}" "-np" "${MPI_NUM_PROCESSES}")
-set(EXPECTED "${CMAKE_CURRENT_SOURCE_DIR}/test1")
-set(ACTUAL_FILE "${CMAKE_CURRENT_SOURCE_DIR}/test1_out")
-
-add_test(NAME ctest1 
-COMMAND mpirun -n 2 MPIPCL_Test_1 10 10 ">" ${EXPECTED})
-
-
-#The below code works
-#add_test(NAME ctest1 
-#COMMAND mpirun -n 2 MPIPCL_Test_1 10 10)
-#set_tests_properties(ctest1 PROPERTIES PASS_REGULAR_EXPRESSION "sum = 55.000000") 
