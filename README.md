@@ -22,7 +22,7 @@ make <options>
 
 ### CMake Build Options
  - `-DBUILD_SHARED_LIBS` (ON) : Builds a shared library instead of a static library
- - `-DBUILD_EXAMPLES` (OFF): Build some examples. Examples by default are in `<build>/examples/BASIC`
+ - `-DWITH_DEBUG` (OFF) : Build with additional print statements for debugging purposes. 
  - `-DBUILD_TESTS` (OFF) : Build ctests for correctness checking. After building tests can be run using ctest in the main build folder. 
  
  Ctests can be run by either making the test target or by running ctest in the build directory. 
