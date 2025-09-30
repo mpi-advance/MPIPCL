@@ -1,4 +1,4 @@
-
+add_subdirectory(bindings)
 add_subdirectory(source)
 
 target_include_directories(MPIPCL PUBLIC
