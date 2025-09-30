@@ -53,7 +53,7 @@ find_package(Threads REQUIRED)
 target_link_libraries(MPIPCL PUBLIC MPI::MPI_C Threads::Threads)
 
 ##### Traverse subdirectories #####
-add_subdirectory(src)
+add_subdirectory(library)
 add_subdirectory(include)
 if(BUILD_EXAMPLES)
 	add_subdirectory(examples)
