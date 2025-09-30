@@ -20,7 +20,6 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <debug.h>
 #ifndef __cplusplus
 #include <stdatomic.h>
 #endif
@@ -376,11 +375,11 @@ int MPIP_Request_free(MPIP_Request* request);
  * @param X The string to pass to `printf`
  * @param ... The remaining values to pass to `printf`.
  */
-/* #if defined(WITH_DEBUG)
+#if defined(WITH_DEBUG)
 #define MPIPCL_DEBUG(X, ...) printf(X, ##__VA_ARGS__);
 #else
 #define MPIPCL_DEBUG(X, ...)
-#endif */
+#endif
 
 #ifdef __cplusplus
 }

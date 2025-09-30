@@ -12,6 +12,8 @@ cmake_dependent_option(EXAMPLES_TO_BIN "Create examples in <install>/bin. requir
 ##### Create main project target: MPIPCL #####
 add_library(MPIPCL "")
 
+message (STATUS "REORG-BRANCH")
+
 ## Basic target properties
 set_target_properties(MPIPCL PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(MPIPCL PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
