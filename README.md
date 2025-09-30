@@ -23,7 +23,7 @@ make <options>
 ### CMake Build Options
  - `-DBUILD_SHARED_LIBS` (ON) : Builds a shared library instead of a static library
  - `-DBUILD_EXAMPLES` (OFF): Build some examples. Examples by default are in `<build>/examples/BASIC`
- - `-DEXAMPLES_TO_BIN` (OFF) : If building examples, will also install examples to `<install_dir>/bin` in addition to `<build>/examples/BASIC`
+ - `-DBUILD_TESTS` (OFF) : Build ctests for correctness checking. After building tests can be run using ctest in the main build folder. 
 
 ### Using the Library
 In order to use the library, you will need to make sure it is either included in RPATH or the containing directory is added to LD_LIBRARY_PATH and you will need to include the supplied `MPIPCL.h`.  

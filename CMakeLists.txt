@@ -6,6 +6,7 @@ include(CTest)
 ##### Available options #####
 option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
 option(WITH_DEBUG "Turn debug statements on or off." OFF)
+option(BUILD_TESTS "Turn debug statements on or off." OFF)
 
 ##### Create main project target: MPIPCL #####
 add_library(MPIPCL "")
@@ -58,10 +59,10 @@ add_subdirectory(include)
 install(TARGETS MPIPCL
 	    EXPORT MPIPCLTargets)
 
-
-enable_testing()
-add_subdirectory(tests)
-
+if(BUILD_TESTS)
+	enable_testing()
+	add_subdirectory(tests)
+endif()
 
 ##### Code for CMake Packaging
 include(CMakePackageConfigHelpers)
