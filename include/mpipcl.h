@@ -14,31 +14,19 @@ extern "C" {
 #endif
 
 #include <mpi.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifndef __cplusplus
-#endif
-#include <assert.h>
-
-
-/** @brief The length used for MPI_Info-related strings. */
-#define MPIPCL_TAG_LENGTH 20
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <mpi.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <debug.h>
 #ifndef __cplusplus
 #include <stdatomic.h>
-#include "debug.h"
 #endif
+
+/** @brief The length used for MPI_Info-related strings. */
+#define MPIPCL_TAG_LENGTH 20
 
 
 /** @brief Internal structure to hold communication message details

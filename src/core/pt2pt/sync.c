@@ -60,7 +60,7 @@ void* threaded_sync_driver(void* args)
     }
     else if (request->side == SENDER && request->state == ACTIVE)
     {
-        MPIPCL_DEBUG("%d THREAD IS STARTING SENDS:%d \n", request->side, request->size)
+        MPIPCL_DEBUG("%d THREAD IS STARTING SENDS:%d \n", request->side, request->size);
         send_ready(request);
     }
     // once caught up, signal thread completion and return.
