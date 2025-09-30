@@ -6,7 +6,7 @@ include(CTest)
 ##### Available options #####
 option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
 option(WITH_DEBUG "Turn debug statements on or off." OFF)
-option(BUILD_TESTS "Turn debug statements on or off." OFF)
+option(BUILD_TESTS "Turn ctest on and make tests." OFF)
 
 ##### Create main project target: MPIPCL #####
 add_library(MPIPCL "")

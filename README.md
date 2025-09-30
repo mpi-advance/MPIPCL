@@ -24,6 +24,17 @@ make <options>
  - `-DBUILD_SHARED_LIBS` (ON) : Builds a shared library instead of a static library
  - `-DBUILD_EXAMPLES` (OFF): Build some examples. Examples by default are in `<build>/examples/BASIC`
  - `-DBUILD_TESTS` (OFF) : Build ctests for correctness checking. After building tests can be run using ctest in the main build folder. 
+ 
+ Ctests can be run by either making the test target or by running ctest in the build directory. 
+ 
+``` 
+ make test
+```
+or
+```
+ ctest
+```
+ 
 
 ### Using the Library
 In order to use the library, you will need to make sure it is either included in RPATH or the containing directory is added to LD_LIBRARY_PATH and you will need to include the supplied `MPIPCL.h`.  
