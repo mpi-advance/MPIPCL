@@ -6,8 +6,6 @@ include(CTest)
 ##### Available options #####
 option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
 option(WITH_DEBUG "Turn debug statements on or off." OFF)
-option(BUILD_EXAMPLES "Turn on building of MPIPCL Examples." OFF)
-cmake_dependent_option(EXAMPLES_TO_BIN "Create examples in <install>/bin. requires BUILD_EXAMPLES" OFF "BUILD_EXAMPLES" OFF)
 
 ##### Create main project target: MPIPCL #####
 add_library(MPIPCL "")
@@ -55,16 +53,15 @@ target_link_libraries(MPIPCL PUBLIC MPI::MPI_C Threads::Threads)
 ##### Traverse subdirectories #####
 add_subdirectory(library)
 add_subdirectory(include)
-if(BUILD_EXAMPLES)
-	add_subdirectory(examples)
-endif()
-
-enable_testing()
-	add_subdirectory(tests)
 
 ##### install mpipcl #####
 install(TARGETS MPIPCL
 	    EXPORT MPIPCLTargets)
+
+
+enable_testing()
+add_subdirectory(tests)
+
 
 ##### Code for CMake Packaging
 include(CMakePackageConfigHelpers)
