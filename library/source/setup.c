@@ -3,6 +3,7 @@
  */
 
 #include "mpipcl.h"
+#include "pt2pt.h"
 
 // functions used by both side of the communication.
 // called by Init function in mpipcl.c

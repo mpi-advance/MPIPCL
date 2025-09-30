@@ -1,12 +1,12 @@
 cmake_minimum_required (VERSION 3.17 FATAL_ERROR)
 project(MPIPCL VERSION 1.4.0 LANGUAGES C)
 include(CMakeDependentOption)
+include(CTest)
 
 ##### Available options #####
 option(BUILD_SHARED_LIBS "Build MPIPCL shared library." ON)
 option(WITH_DEBUG "Turn debug statements on or off." OFF)
-option(BUILD_EXAMPLES "Turn on building of MPIPCL Examples." OFF)
-cmake_dependent_option(EXAMPLES_TO_BIN "Create examples in <install>/bin. requires BUILD_EXAMPLES" OFF "BUILD_EXAMPLES" OFF)
+option(BUILD_TESTS "Turn ctest on and make tests." OFF)
 
 ##### Create main project target: MPIPCL #####
 add_library(MPIPCL "")
@@ -15,6 +15,8 @@ add_library(MPIPCL "")
 set_target_properties(MPIPCL PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(MPIPCL PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
 set_target_properties(MPIPCL PROPERTIES PUBLIC_HEADER include/mpipcl.h)
+# set_target_properties(MPIPCL PROPERTIES PRIVATE_HEADER include/MPIP_Request.h)
+# set_target_properties(MPIPCL PROPERTIES PRIVATE_HEADER include/pt2pt.h)
 set_target_properties(MPIPCL PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(MPIPCL PROPERTIES C_STANDARD 11)
 
@@ -50,15 +52,17 @@ find_package(Threads REQUIRED)
 target_link_libraries(MPIPCL PUBLIC MPI::MPI_C Threads::Threads)
 
 ##### Traverse subdirectories #####
-add_subdirectory(src)
+add_subdirectory(library)
 add_subdirectory(include)
-if(BUILD_EXAMPLES)
-	add_subdirectory(examples)
-endif()
 
 ##### install mpipcl #####
 install(TARGETS MPIPCL
 	    EXPORT MPIPCLTargets)
+
+if(BUILD_TESTS)
+	enable_testing()
+	add_subdirectory(tests)
+endif()
 
 ##### Code for CMake Packaging
 include(CMakePackageConfigHelpers)
@@ -87,3 +91,4 @@ install(EXPORT MPIPCLTargets
 	NAMESPACE MPIAdvance::
 	DESTINATION share/${PROJECT_NAME}
 )
+
