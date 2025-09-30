@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.17 FATAL_ERROR)
-project(MPIPCL VERSION 1.4.0 LANGUAGES C)
+project(MPIPCL VERSION 1.5.0 LANGUAGES C)
 include(CMakeDependentOption)
 include(CTest)
 
