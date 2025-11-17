@@ -189,4 +189,6 @@ MPIP_Parrived(MPIP_Request* request, int partition, int* flag)
 Information about classes, structures, and internal functions may be accessed by using Doxygen with the supplied .Doxyfile (run `doxygen .Doxyfile` from the top level of this repo).
 
 ### Acknowledgments
-This work has been partially funded by ...
+This work was performed with support from the National Science Foundation  under Grants Nos. CCF-1562306, CCF-1822191, CCF-1821431, OAC-1923980, OAC-1549812, and OAC-1925603, the U.S. Department of Energy's National Nuclear Security Administration (NNSA) under the Predictive Science Academic Alliance Program (PSAAP-III), Award DE-NA0003966, the University of Alabama at Birmingham, and the Alabama Innovation Fund.
+
+Any opinions, findings, and conclusions or recommendations expressed in this material are those of the authors and do not necessarily reflect the views of the National Science Foundation or the U.S. Department of Energy's National Nuclear Security Administration.
