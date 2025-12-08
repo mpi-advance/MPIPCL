@@ -23,7 +23,7 @@ set_target_properties(MPIPCL PROPERTIES C_STANDARD 11)
 # Set default build type
 if(NOT CMAKE_BUILD_TYPE)
 	message(STATUS "No CMAKE_BUILD_TYPE specified, setting build type to RELEASE.")
-	set(CMAKE_BUILD_TYPE "RELEASE")
+	set(CMAKE_BUILD_TYPE RELEASE CACHE STRING "Build type for project." FORCE)
 endif()
 
 # Convert to lower case string to ignore case
